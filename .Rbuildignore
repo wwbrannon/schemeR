@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^packrat/
+^\.Rprofile$
+^.travis.yml$
+^README.Rmd$
