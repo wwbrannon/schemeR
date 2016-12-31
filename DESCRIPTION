@@ -1,0 +1,15 @@
+Package: schemeR
+Type: Package
+Authors@R: c(person("William", "Brannon", email="wwbrannon@email.wm.edu", role=c("aut", "cre")))
+Title: Ports of Scheme Facilities to R
+Version: 0.1.0.9000
+Description: Provide R versions of certain language features found in "proper"
+    Scheme dialects, insofar as this is possible without modifying R itself.
+    In particular, provide tools to build Lisp-style macros in R.
+License: MIT + file LICENSE
+URL: https://github.com/wwbrannon/schemeR
+BugReports: https://github.com/wwbrannon/schemeR/issues
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.2.0)
