@@ -13,4 +13,6 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.2.0)
-Suggests: testthat
+Suggests:
+    testthat
+RoxygenNote: 5.0.1
