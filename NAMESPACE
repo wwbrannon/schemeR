@@ -3,3 +3,4 @@
 export(.)
 export(infix)
 export(infixFiles)
+export(prefix)

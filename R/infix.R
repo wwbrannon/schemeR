@@ -33,6 +33,26 @@ function(expr)
     }
 }
 
+#' @export
+prefix <-
+function(expr)
+{
+    if(is.expression(expr))
+    {
+        lst <- lapply(as.list(expr), prefix)
+        return(as.expression(lst))
+    } else if(is.call(expr))
+    {
+        lst <- lapply(as.list(expr), prefix)
+        lst <- c(as.symbol("."), lst)
+
+        return(as.call(lst))
+    } else
+    {
+        return(expr)
+    }
+}
+
 expr2char <-
 function(expr)
 {
