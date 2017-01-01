@@ -8,6 +8,50 @@ comma
 comma-at
 quote
 sharpquote
-o) other common lisp functions
+
+o) more easily implemented scheme functions
+lambda
+define
+quote
+cond
+let
+let.star
+letrec
+
+eq
+equal
+map
+
+car
+caar
+cadar
+caddr
+cadr
+cdddr
+cddr
+cdr
+cdrs
+
+for.each
+is.even
+is.nil
+is.odd
+
+cons
+append
+reverse
+display
+compose
+first
+last
+nil
+
+pair.fold.right
+pairwise
+
+zip
+zip.c
+zip.list
+zip.with.names
 
 o) update README.Rmd, NEWS.md, cran-comments.md and other docs
