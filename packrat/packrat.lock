@@ -73,6 +73,11 @@ Version: 1.15.1
 Hash: eed7437e2b614c9e3923b7932b16ac97
 Requires: digest, evaluate, highr, markdown, stringr, yaml
 
+Package: lisp
+Source: CRAN
+Version: 0.1
+Hash: c3a09ad3ea62a1ba7c6d67aa369d61aa
+
 Package: magrittr
 Source: CRAN
 Version: 1.5
