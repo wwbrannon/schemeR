@@ -1,4 +1,4 @@
-## Allow writing R code in an infix style, like Lisp
+## Allow writing R code in a prefix style, like Lisp
 
 #' Express an R function call in prefix notation
 #'
