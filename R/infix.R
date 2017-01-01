@@ -57,7 +57,8 @@ expr2char <-
 function(expr)
 {
     #We don't want to handle expressions nested under calls: the idea here
-    #is to handle only the type of expressions that result from infix()
+    #is to handle only the type of expressions that result from infix() and
+    #prefix()
     if(is.expression(expr))
     {
         lst <- lapply(as.list(expr), expr2char)
@@ -71,19 +72,21 @@ function(expr)
     }
 }
 
-#' @export
-infixFiles <-
-function(files, overwrite=FALSE)
+fileconv <-
+function(files, direction, overwrite=FALSE)
 {
-    #If !overwrite, we're going to assume each of these not-quite-R
-    #files has the extension ".Rl" so we can write the converted file
-    #with extension ".R" - throw if this is not the case
-    if(!is.null(overwrite) && !overwrite)
+    stopifnot(direction %in% c("prefix", "infix"))
+    fn <- get(direction)
+
+    if(is.null(overwrite) || !overwrite)
     {
+        target_ext <- ifelse(direction == "prefix", "Rl", "R")
+        src_ext <- ifelse(direction == "prefix", "R", "Rl")
+
         exts <- unique(vapply(files, tools::file_ext, character(1)))
-        if(length(exts) > 1 || exts[1] != "Rl")
+        if(length(exts) > 1 || exts[1] != src_ext)
         {
-            stop("Files must have .Rl extension unless overwrite=TRUE")
+            stop(paste0("Files must have .", src_ext, " extension unless overwrite==TRUE"))
         }
     }
 
@@ -92,15 +95,16 @@ function(files, overwrite=FALSE)
         filename <- normalizePath(filename)
 
         txt <- readChar(filename, file.info(filename)$size)
-        conv <- infix(parse(text=txt))
+        conv <- fn(parse(text=txt))
 
-        if(!is.null(overwrite) && overwrite)
-        {
-            nf <- filename
-        } else
+        if(is.null(overwrite) || !overwrite)
         {
             ext <- tools::file_ext(filename)
-            nf <- paste0(substr(filename, 1, nchar(filename) - nchar(ext) - 1), ".R")
+            nf <- paste0(substr(filename, 1, nchar(filename) - nchar(ext) - 1), ".")
+            nf <- paste0(nf, target_ext)
+        } else
+        {
+            nf <- filename
         }
 
         con <- file(nf, open="w+")
@@ -111,40 +115,15 @@ function(files, overwrite=FALSE)
 }
 
 #' @export
+infixFiles <-
+function(files, overwrite=FALSE)
+{
+    fileconv(files=files, direction="infix", overwrite=overwrite)
+}
+
+#' @export
 prefixFiles <-
 function(files, overwrite=FALSE)
 {
-    #If !overwrite, we're going to assume each of these files has
-    #the extension ".R" so we can write the converted file with
-    #extension ".Rl" - throw if this is not the case
-    if(!is.null(overwrite) && !overwrite)
-    {
-        exts <- unique(vapply(files, tools::file_ext, character(1)))
-        if(length(exts) > 1 || exts[1] != "R")
-        {
-            stop("Files must have .R extension unless overwrite=TRUE")
-        }
-    }
-
-    for(filename in files)
-    {
-        filename <- normalizePath(filename)
-
-        txt <- readChar(filename, file.info(filename)$size)
-        conv <- prefix(parse(text=txt))
-
-        if(!is.null(overwrite) && overwrite)
-        {
-            nf <- filename
-        } else
-        {
-            ext <- tools::file_ext(filename)
-            nf <- paste0(substr(filename, 1, nchar(filename) - nchar(ext) - 1), ".Rl")
-        }
-
-        con <- file(nf, open="w+")
-        cat(expr2char(conv), file=con)
-
-        return(invisible(NULL))
-    }
+    fileconv(files=files, direction="prefix", overwrite=overwrite)
 }
