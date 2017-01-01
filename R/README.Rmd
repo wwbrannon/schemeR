@@ -1,0 +1,55 @@
+---
+    output: github_document
+---
+
+    <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+    ```{r set-options, echo=FALSE, cache=FALSE}
+library(schemeR)
+library(knitr)
+
+options(width=80)
+knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>",
+    fig.path = "README-",
+    warning = FALSE,
+    message = FALSE,
+    echo = TRUE,
+    tidy = TRUE,
+    size="small",
+    linewidth=80
+)
+
+# From https://github.com/yihui/knitr-examples/blob/master/077-wrap-output.Rmd
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+    # this hook is used only when the linewidth option is not NULL
+    if (!is.null(n <- options$linewidth)) {
+        x = knitr:::split_lines(x)
+        # any lines wider than n should be wrapped
+        if (any(nchar(x) > n)) x = strwrap(x, width = n)
+        x = paste(x, collapse = '\n')
+    }
+    hook_output(x, options)
+})
+```
+
+[![Build Status](https://img.shields.io/travis/wwbrannon/schemeR.svg?style=flat)](https://travis-ci.org/wwbrannon/schemeR)
+<!-- [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/schemeR)](https://cran.r-project.org/package=schemeR)
+[![Downloads](https://cranlogs.r-pkg.org/badges/schemeR)](https://cran.r-project.org/package=schemeR) -->
+[![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://wwbrannon.mit-license.org/)
+
+# schemeR
+
+Ports of certain features found in traditional Scheme dialects to R
+(which is itself descended from Scheme), insofar as this is possible
+without modifying R itself. In particular, provide tools to build
+Lisp-style macros in R.
+
+## Installation:
+There's no CRAN version yet, so install the dev version from github:
+```
+install.packages("devtools")
+devtools::install_github("wwbrannon/schemeR")
+```

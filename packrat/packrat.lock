@@ -13,6 +13,11 @@ Source: CRAN
 Version: 0.12.8
 Hash: 436ad5c23fad4e22224c7ac2fc82b049
 
+Package: assertthat
+Source: CRAN
+Version: 0.1
+Hash: 0afb92b59b02593c70ff8046700ba9d3
+
 Package: brew
 Source: CRAN
 Version: 1.0-6
@@ -72,6 +77,11 @@ Source: CRAN
 Version: 1.15.1
 Hash: eed7437e2b614c9e3923b7932b16ac97
 Requires: digest, evaluate, highr, markdown, stringr, yaml
+
+Package: lazyeval
+Source: CRAN
+Version: 0.2.0
+Hash: 3d6e7608e65bbf5cb170dab1e3c9ed8b
 
 Package: lisp
 Source: CRAN

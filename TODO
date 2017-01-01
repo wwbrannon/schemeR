@@ -1,7 +1,6 @@
 o) the R() conversion blocker
 o) documentation for functions and package NULL
 o) tests
-o) README.Rmd
 
 o) macros
 defmacro
