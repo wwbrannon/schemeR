@@ -30,7 +30,21 @@ extension ".Rl".
 \section{See Also}{
 
 \code{\link{infix}} and \code{\link{prefix}} for converting expressions
-from R-style infix to Lisp-style prefix and vice versa; the \code{\link{.}}
+from R-style infix to Lisp-style prefix and vice versa; the \code{.}
 function, which is the building block of prefix-formatted R code.
+}
+\examples{
+
+\dontrun{
+prefixFiles(c("ex1.R", "ex2.R", "ex3.R"), overwrite=FALSE)
+prefixFiles(c("ex1.myext", "ex2.myext", "ex3.myext"), overwrite=TRUE)
+}
+
+
+\dontrun{
+infixFiles(c("ex1.Rl", "ex2.Rl", "ex3.Rl"), overwrite=FALSE)
+infixFiles(c("ex1.myext", "ex2.myext", "ex3.myext"), overwrite=TRUE)
+}
+
 }
 

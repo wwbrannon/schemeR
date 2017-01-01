@@ -28,7 +28,7 @@ carried through.
 }
 \description{
 \code{prefix} and \code{infix} convert R code between the usual infix
-syntax and the Lisp-like prefix format written via the \code{\link{.}}
+syntax and the Lisp-like prefix format written via the \code{.}
 function (see below). A call to \code{prefix()} does not evaluate the passed
 or the generated expressions, partly for efficiency reasons; \code{infix()},
 though it still does not evaluate the generated expression, does do
@@ -46,5 +46,22 @@ can be written in the prefix form.
 
 \code{\link{prefixFiles}} and \code{\link{infixFiles}} for converting
 code found in files.
+}
+\examples{
+prefix(expression(x <- runif(10), y <- runif(10), cor(x, y)))
+
+prefix(expression(with(datasets::iris, sum(Sepal.Length^2 + Petal.Width))))
+
+
+infix(expression(.(`<-`, x, .(runif, 10)), .(`<-`, y, .(runif, 10)),
+                 .(cor, x, y)))
+
+infix(expression(.(with, .(`::`, datasets, iris),
+                             .(sum, .(`+`, .(`^`, Sepal.Length, 2),
+                                           Petal.Width)))))
+.(`+`, 1, 2)
+
+.(sum, .(runif, 10), .(runif, 10))
+
 }
 

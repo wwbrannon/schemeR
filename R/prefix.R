@@ -3,7 +3,7 @@
 #' Facilities for writing R code in prefix notation
 #'
 #' \code{prefix} and \code{infix} convert R code between the usual infix
-#' syntax and the Lisp-like prefix format written via the \code{\link{.}}
+#' syntax and the Lisp-like prefix format written via the \code{.}
 #' function (see below). A call to \code{prefix()} does not evaluate the passed
 #' or the generated expressions, partly for efficiency reasons; \code{infix()},
 #' though it still does not evaluate the generated expression, does do
@@ -18,6 +18,11 @@
 #' @section See Also:
 #' \code{\link{prefixFiles}} and \code{\link{infixFiles}} for converting
 #' code found in files.
+#'
+#' @examples
+#' prefix(expression(x <- runif(10), y <- runif(10), cor(x, y)))
+#'
+#' prefix(expression(with(datasets::iris, sum(Sepal.Length^2 + Petal.Width))))
 #'
 #' @name prefix
 #' @rdname prefix
@@ -41,6 +46,14 @@ function(expr)
     }
 }
 
+#' @examples
+#'
+#' infix(expression(.(`<-`, x, .(runif, 10)), .(`<-`, y, .(runif, 10)),
+#'                  .(cor, x, y)))
+#'
+#' infix(expression(.(with, .(`::`, datasets, iris),
+#'                              .(sum, .(`+`, .(`^`, Sepal.Length, 2),
+#'                                            Petal.Width)))))
 #' @rdname prefix
 #' @export
 infix <-
@@ -80,6 +93,11 @@ function(expr)
 #'
 #' @return \code{.} returns an unevaluated call to f with \code{...} arguments
 #' carried through.
+#'
+#' @examples
+#' .(`+`, 1, 2)
+#'
+#' .(sum, .(runif, 10), .(runif, 10))
 #'
 #' @rdname prefix
 #' @export
@@ -191,8 +209,15 @@ function(files, direction, overwrite=FALSE)
 #'
 #' @section See Also:
 #' \code{\link{infix}} and \code{\link{prefix}} for converting expressions
-#' from R-style infix to Lisp-style prefix and vice versa; the \code{\link{.}}
+#' from R-style infix to Lisp-style prefix and vice versa; the \code{.}
 #' function, which is the building block of prefix-formatted R code.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' prefixFiles(c("ex1.R", "ex2.R", "ex3.R"), overwrite=FALSE)
+#' prefixFiles(c("ex1.myext", "ex2.myext", "ex3.myext"), overwrite=TRUE)
+#' }
 #'
 #' @name fileconv
 #' @rdname fileconv
@@ -203,6 +228,13 @@ function(files, overwrite=FALSE)
     fileconv(files=files, direction="prefix", overwrite=overwrite)
 }
 
+#' @examples
+#'
+#' \dontrun{
+#' infixFiles(c("ex1.Rl", "ex2.Rl", "ex3.Rl"), overwrite=FALSE)
+#' infixFiles(c("ex1.myext", "ex2.myext", "ex3.myext"), overwrite=TRUE)
+#' }
+#'
 #' @rdname fileconv
 #' @export
 infixFiles <-
