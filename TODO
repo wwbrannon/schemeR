@@ -10,9 +10,6 @@ quote
 sharpquote
 
 o) more easily implemented scheme functions
-lambda
-define
-quote
 cond
 let
 let.star
@@ -20,7 +17,6 @@ letrec
 
 eq
 equal
-map
 
 car
 caar
@@ -37,14 +33,9 @@ is.even
 is.nil
 is.odd
 
-cons
 append
 reverse
-display
 compose
-first
-last
-nil
 
 pair.fold.right
 pairwise
