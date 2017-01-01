@@ -1,6 +1,5 @@
 
-    <!-- README.md is generated from README.Rmd. Please edit that file -->
-
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 [![Build Status](https://img.shields.io/travis/wwbrannon/schemeR.svg?style=flat)](https://travis-ci.org/wwbrannon/schemeR) <!-- [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/schemeR)](https://cran.r-project.org/package=schemeR)
 [![Downloads](https://cranlogs.r-pkg.org/badges/schemeR)](https://cran.r-project.org/package=schemeR) --> [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://wwbrannon.mit-license.org/)
 
