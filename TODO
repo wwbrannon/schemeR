@@ -10,8 +10,4 @@ quote
 sharpquote
 o) other common lisp functions
 
-o) examples
 o) update README.Rmd, NEWS.md, cran-comments.md and other docs
-
-o) a vignette?
-o) tail call elimination?
