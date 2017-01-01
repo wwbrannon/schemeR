@@ -109,3 +109,42 @@ function(files, overwrite=FALSE)
         return(invisible(NULL))
     }
 }
+
+#' @export
+prefixFiles <-
+function(files, overwrite=FALSE)
+{
+    #If !overwrite, we're going to assume each of these files has
+    #the extension ".R" so we can write the converted file with
+    #extension ".Rl" - throw if this is not the case
+    if(!is.null(overwrite) && !overwrite)
+    {
+        exts <- unique(vapply(files, tools::file_ext, character(1)))
+        if(length(exts) > 1 || exts[1] != "R")
+        {
+            stop("Files must have .R extension unless overwrite=TRUE")
+        }
+    }
+
+    for(filename in files)
+    {
+        filename <- normalizePath(filename)
+
+        txt <- readChar(filename, file.info(filename)$size)
+        conv <- prefix(parse(text=txt))
+
+        if(!is.null(overwrite) && overwrite)
+        {
+            nf <- filename
+        } else
+        {
+            ext <- tools::file_ext(filename)
+            nf <- paste0(substr(filename, 1, nchar(filename) - nchar(ext) - 1), ".Rl")
+        }
+
+        con <- file(nf, open="w+")
+        cat(expr2char(conv), file=con)
+
+        return(invisible(NULL))
+    }
+}

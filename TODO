@@ -1,6 +1,5 @@
 o) the R() conversion blocker
-o) prefixFiles
-o) documentation for functions
+o) documentation for functions and package NULL
 o) tests
 o) README.Rmd
 
@@ -14,9 +13,7 @@ sharpquote
 o) other common lisp functions
 
 o) examples
-o) cran-comments.md
-o) NEWS.md
-o) update README.Rmd
+o) update README.Rmd, NEWS.md, cran-comments.md and other docs
 
 o) a vignette?
 o) tail call elimination?
