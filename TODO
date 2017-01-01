@@ -1,3 +1,9 @@
+o) the R() conversion blocker
+o) prefixFiles
+o) documentation for functions
+o) tests
+o) README.Rmd
+
 o) macros
 defmacro
 bquote
@@ -6,12 +12,11 @@ comma-at
 quote
 sharpquote
 o) other common lisp functions
-o) tail call elimination?
 
-o) documentation for functions
-o) tests
-o) more examples
-o) a vignette?
+o) examples
 o) cran-comments.md
 o) NEWS.md
-o) README.Rmd
+o) update README.Rmd
+
+o) a vignette?
+o) tail call elimination?
