@@ -1,50 +1,47 @@
 ## Allow writing R code in a prefix style, like Lisp
 
-#' Express an R function call in prefix notation
+#' Facilities for writing R code in prefix notation
 #'
-#' This function allows writing an R function call in a Lisp-like prefix
-#' format, rather than the f(x, y, ...) infix format that R usually uses.
-#' When evaluated, a call to \code{.} doesn't actually execute the function
-#' that's been expressed in infix style, just generates the corresponding
-#' prefix call. It's intended as a notational aid, so that entire scripts
-#' can be written in the infix form.
+#' \code{prefix} and \code{infix} convert R code between the usual infix
+#' syntax and the Lisp-like prefix format written via the \code{\link{.}}
+#' function (see below). A call to \code{prefix()} does not evaluate the passed
+#' or the generated expressions, partly for efficiency reasons; \code{infix()},
+#' though it still does not evaluate the generated expression, does do
+#' partial evaluation of the passed expression: each call to \code{.} is
+#' evaluated to the corresponding infix call.
 #'
-#' @param f The function to generate a call to.
-#' @param ... Further arguments to the function f.
+#' @param expr A prefix- or infix-formatted expression to convert
 #'
-#' @return An unevaluated call to f with \code{...} arguments carried through.
+#' @return \code{prefix} and \code{infix} return the input expression
+#' converted to prefix or infix.
 #'
 #' @section See Also:
-#' \code{\link{infix}} and \code{\link{prefix}} for converting expressions
-#' from R-style infix to Lisp-style prefix and vice versa;
-#' \code{\link{infixFiles}} and \code{\link{prefixFiles}} for converting
+#' \code{\link{prefixFiles}} and \code{\link{infixFiles}} for converting
 #' code found in files.
 #'
+#' @name prefix
+#' @rdname prefix
 #' @export
-. <-
-function(f, ...)
+prefix <-
+function(expr)
 {
-    match.call()[-1]
+    if(is.expression(expr))
+    {
+        lst <- lapply(as.list(expr), prefix)
+        return(as.expression(lst))
+    } else if(is.call(expr))
+    {
+        lst <- lapply(as.list(expr), prefix)
+        lst <- c(as.symbol("."), lst)
+
+        return(as.call(lst))
+    } else
+    {
+        return(expr)
+    }
 }
 
-#' Convert prefix-formatted R code to infix
-#'
-#' This function converts R code written in a Lisp-like prefix format, via the
-#' \code{\link{.}} function, to the usual infix R syntax. A call to infix()
-#' does not evaluate the generated expression, partly for efficiency reasons,
-#' though it does partial evaluation of the passed expression: each call to
-#' \code{.} is evaluated to the corresponding infix call.
-#'
-#' @param expr A prefix-formatted expression (via the \code{.} function).
-#'
-#' @return The prefix-formatted expression converted to infix.
-#'
-#' @section See Also:
-#' The \code{\link{.}} function, which is the building block of prefix-
-#' formatted R code; \code{\link{prefix}}, the inverse of \code{infix};
-#' \code{\link{infixFiles}} and \code{\link{prefixFiles}} for converting
-#' code found in files.
-#'
+#' @rdname prefix
 #' @export
 infix <-
 function(expr)
@@ -71,41 +68,25 @@ function(expr)
     }
 }
 
-#' Convert infix-formatted R code to prefix
+#' The \code{.} function allows writing an R function call in a Lisp-like prefix
+#' format, rather than the f(x, y, ...) infix format that R usually uses.
+#' When evaluated, a call to \code{.} doesn't actually execute the function
+#' that's been expressed in prefix style, just generates the corresponding
+#' infix call. It's intended as a notational aid, so that entire scripts
+#' can be written in the prefix form.
 #'
-#' This function converts R code written in the usual infix R syntax to
-#' a Lisp-like prefix syntax expressed via the \code{\link{.}} function. A
-#' call to prefix() does not evaluate the passed expression or the generated
-#' one, partly for efficiency reasons.
+#' @param f The function that \code{.} should generate a call to.
+#' @param ... Further arguments to the function f.
 #'
-#' @param expr An infix-formatted expression.
+#' @return \code{.} returns an unevaluated call to f with \code{...} arguments
+#' carried through.
 #'
-#' @return The infix-formatted expression converted to prefix.
-#'
-#' @section See Also:
-#' The \code{\link{.}} function, which is the building block of prefix-
-#' formatted R code; \code{\link{infix}}, the inverse of \code{prefix};
-#' \code{\link{infixFiles}} and \code{\link{prefixFiles}} for converting
-#' code found in files.
-#'
+#' @rdname prefix
 #' @export
-prefix <-
-function(expr)
+. <-
+function(f, ...)
 {
-    if(is.expression(expr))
-    {
-        lst <- lapply(as.list(expr), prefix)
-        return(as.expression(lst))
-    } else if(is.call(expr))
-    {
-        lst <- lapply(as.list(expr), prefix)
-        lst <- c(as.symbol("."), lst)
-
-        return(as.call(lst))
-    } else
-    {
-        return(expr)
-    }
+    match.call()[-1]
 }
 
 # Convert an R expression object to a format suitable for writing to a file
@@ -193,37 +174,15 @@ function(files, direction, overwrite=FALSE)
     }
 }
 
-#' Convert one or more R code files from prefix to infix
+#' Convert R code files from prefix to infix, or vice versa
 #'
-#' This function converts files from prefix to infix. It can be told to
-#' overwrite the passed files, or to generate new files. In the
-#' latter case, the input files are assumed to have extension ".Rl", and the
-#' corresponding output files will have extension ".R".
-#'
-#' @param files A character vector of file paths to convert.
-#' @param overwrite Should the generated code overwrite the input file?
-#'
-#' @return Invisible NULL.
-#'
-#' @section See Also:
-#' \code{\link{prefixFiles}} for converting files in the other direction;
-#' \code{\link{infix}} and \code{\link{prefix}} for converting expressions
-#' from R-style infix to Lisp-style prefix and vice versa; the \code{\link{.}}
-#' function, which is the building block of prefix-formatted R code.
-#'
-#' @export
-infixFiles <-
-function(files, overwrite=FALSE)
-{
-    fileconv(files=files, direction="infix", overwrite=overwrite)
-}
-
-#' Convert one or more R code files from infix to prefix
-#'
-#' This function converts files from infix to prefix. It can be told to
-#' overwrite the passed files, or to generate new files. In the
-#' latter case, the input files are assumed to have extension ".R", and the
-#' corresponding output files will have extension ".Rl".
+#' These functions convert files from prefix to infix, and vice versa.
+#' They can be told to overwrite the passed files, or to generate new files.
+#' In the latter case, when converting to infix, the input files are assumed
+#' to have extension ".Rl", and the corresponding output files will have
+#' extension ".R"; when converting to prefix, the input files are assumed
+#' to have extension ".R", and the corresponding output files will have
+#' extension ".Rl".
 #'
 #' @param files A character vector of file paths to convert.
 #' @param overwrite Should the generated code overwrite the input file?
@@ -231,14 +190,23 @@ function(files, overwrite=FALSE)
 #' @return Invisible NULL.
 #'
 #' @section See Also:
-#' \code{\link{infixFiles}} for converting files in the other direction;
 #' \code{\link{infix}} and \code{\link{prefix}} for converting expressions
 #' from R-style infix to Lisp-style prefix and vice versa; the \code{\link{.}}
 #' function, which is the building block of prefix-formatted R code.
 #'
+#' @name fileconv
+#' @rdname fileconv
 #' @export
 prefixFiles <-
 function(files, overwrite=FALSE)
 {
     fileconv(files=files, direction="prefix", overwrite=overwrite)
+}
+
+#' @rdname fileconv
+#' @export
+infixFiles <-
+function(files, overwrite=FALSE)
+{
+    fileconv(files=files, direction="infix", overwrite=overwrite)
 }
