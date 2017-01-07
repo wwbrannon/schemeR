@@ -11,31 +11,98 @@ define <- `<-`
 map <- Map
 display <- print
 cons <- c
-write <- cat
-read <- readline
-expt <- `**`
+append <- c #not exactly as in scheme, but close
+expt <- `^`
 reverse <- rev
 member <- `%in%`
+progn <- `{`
+nth <- `[`
+fromPkg <- `::`
 
 is.nil <- is.null
 is.procedure <- is.function
 is.number <- is.numeric
 is.boolean <- is.logical
+quotient <- `%/%`
+remainder <- `%%`
+modulo <- remainder
 
-## Numeric functions
+## Other numeric functions
 is.even <- function(x) { return(x %% 2 == 0) }
 is.odd  <- function(x) { return(x %% 2 == 1) }
 is.zero <- function(x) { return(x == 0) }
 is.positive <- function(x) { return(x > 0) }
 is.negative <- function(x) { return(x < 0) }
 
+## Non-binary comparison operators
+## eq, ge, le, gt, lt: =, >=, <=, >, <
+eq <- function(...) { Reduce(`==`, list(...)) }
+ge <- function(...) { Reduce(`>=`, list(...)) }
+le <- function(...) { Reduce(`<=`, list(...)) }
+gt <- function(...) { Reduce(`>`, list(...)) }
+lt <- function(...) { Reduce(`<`, list(...)) }
+
 ## Assignment operators
-## Unlike in MIT Scheme, there's no distinction between creating a binding
+## Unlike in Scheme, there's no distinction between creating a binding
 ## and assigning a value, so define <=> set.
 set <- define
 
+set.pos <-
+function(nm, pos, val)
+{
+    target <- as.symbol(deparse(substitute(nm)))
+
+    if(is.list(nm))
+    {
+        expr <- bquote(.(target)[[.(pos)]] <- .(val))
+    } else
+    {
+        expr <- bquote(.(target)[.(pos)] <- .(val))
+    }
+
+    eval(expr, envir=parent.frame())
+}
+
+set.car <- functional::Curry(set.pos, pos=1)
+
+set.cdr <-
+function(nm, val)
+{
+    target <- as.symbol(deparse(substitute(nm)))
+
+    if(is.list(nm))
+    {
+        expr <- bquote(.(target) <- c(.(target)[1], .(val)))
+    } else
+    {
+        expr <- bquote(.(target)[2:length( .(target) )] <- .(val))
+    }
+
+    eval(expr, envir=parent.frame())
+}
+
 ## Functional operators
-keep.matching <- Filter
+member.if <-
+function(f, x, k=identity)
+{
+    for(i in seq_along(x))
+    {
+        if(f(k(x[[i]])))
+            return(x[i:length(x)])
+    }
+
+    return(list())
+}
+
+zip <-
+function(...)
+{
+    args <- list(function(...) { return(list(...)) })
+    args <- c(args, list(...))
+    args$SIMPLIFY <- FALSE
+
+    return(do.call(mapply, args))
+}
 
 delete.matching <-
 function(f, x)
@@ -43,11 +110,22 @@ function(f, x)
     return(Filter(Negate(f), x))
 }
 
+keep.matching <- Filter
 keep.matching.items <- keep.matching
 delete.matching.items <- delete.matching
 reduce <- Reduce
 
 ## Type-generic list- or vector-processing functions
+is.empty <- function(obj) length(obj) == 0
+
+make.list <-
+function(n, expr)
+{
+    #As in base, but with a fixed different value for simplify
+    sapply(integer(n), eval.parent(substitute(function(...) expr)),
+           simplify=FALSE)
+}
+
 car <-
 function(obj)
 {
@@ -110,6 +188,86 @@ cddaar <- function(lst) { return(cdr(cdr(car(car(lst))))) }
 cddadr <- function(lst) { return(cdr(cdr(car(cdr(lst))))) }
 cdddar <- function(lst) { return(cdr(cdr(cdr(car(lst))))) }
 cddddr <- function(lst) { return(cdr(cdr(cdr(cdr(lst))))) }
+
+## Flow-control operators
+or <-
+function(...)
+{
+    #Don't evaluate the args up front
+    args <- eval(substitute(alist(...)))
+
+    ret <- NULL
+    for(arg in args)
+    {
+        #only evaluate once in case there are side effects
+        ret <- eval(arg)
+
+        if(!identical(as.logical(ret), FALSE))
+            break
+    }
+
+    return(ret)
+}
+
+and <-
+function(...)
+{
+    #Don't evaluate the args up front
+    args <- eval(substitute(alist(...)))
+
+    ret <- NULL
+    for(arg in args)
+    {
+        #only evaluate once in case there are side effects
+        ret <- eval(arg)
+
+        if(identical(as.logical(ret), FALSE))
+            break
+    }
+
+    return(ret)
+}
+
+case <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+    if(length(args) <= 1)
+        stop("Too few arguments to case")
+
+    #The "key"
+    val <- eval(args[[1]])
+    args <- args[2:length(args)]
+
+    #Make sure the else clause, if one is given, makes sense
+    lc <- args[[length(args)]]
+    print(lc)
+    print(length(lc))
+    if(length(lc) != 3)
+        stop("Malformed case clause")
+    if(lc[[2]] == as.symbol("else"))
+    {
+        args <- args[1:(length(args) - 1)]
+        else_expr <- lc[[2]]
+    } else
+    {
+        else_expr <- quote(NULL)
+    }
+
+    for(i in seq_along(args))
+    {
+        if(length(clause) != 3)
+            stop("Malformed case clause")
+
+        for(obj in clause[[2]])
+        {
+            if(isTRUE(all.equal(val, obj)))
+                return(eval(clause[[2]]))
+        }
+    }
+
+    return(eval(else_expr))
+}
 
 #FIXME
 cond <-
