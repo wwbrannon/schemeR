@@ -18,19 +18,8 @@ letrec
 eq
 equal
 
-car
-caar
-cadar
-caddr
-cadr
-cdddr
-cddr
-cdr
-cdrs
-
 for.each
 is.even
-is.nil
 is.odd
 
 append
