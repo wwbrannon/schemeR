@@ -104,6 +104,19 @@ function(...)
     return(do.call(mapply, args))
 }
 
+for.each <-
+function(f, ...)
+{
+    params <- zip(list(...))
+
+    for(p in params)
+    {
+        do.call(f, p)
+    }
+
+    return(invisible(NULL))
+}
+
 delete.matching <-
 function(f, x)
 {
@@ -226,70 +239,4 @@ function(...)
     }
 
     return(ret)
-}
-
-case <-
-function(...)
-{
-    args <- eval(substitute(alist(...)))
-    if(length(args) <= 1)
-        stop("Too few arguments to case")
-
-    #The "key"
-    val <- eval(args[[1]])
-    args <- args[2:length(args)]
-
-    #Make sure the else clause, if one is given, makes sense
-    lc <- args[[length(args)]]
-    print(lc)
-    print(length(lc))
-    if(length(lc) != 3)
-        stop("Malformed case clause")
-    if(lc[[2]] == as.symbol("else"))
-    {
-        args <- args[1:(length(args) - 1)]
-        else_expr <- lc[[2]]
-    } else
-    {
-        else_expr <- quote(NULL)
-    }
-
-    for(i in seq_along(args))
-    {
-        if(length(clause) != 3)
-            stop("Malformed case clause")
-
-        for(obj in clause[[2]])
-        {
-            if(isTRUE(all.equal(val, obj)))
-                return(eval(clause[[2]]))
-        }
-    }
-
-    return(eval(else_expr))
-}
-
-#FIXME
-cond <-
-function(...)
-{
-    args <- list(...)
-
-    for(val in args)
-    {
-        if(is.list(val))
-        {
-            test <- val[[1]]
-            ret <- val[[2]]
-        } else
-        {
-            test <- val[1]
-            ret <- val[2]
-        }
-
-        if(test)
-        {
-            ret
-        }
-    }
 }

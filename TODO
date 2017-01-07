@@ -1,14 +1,5 @@
 o) the R() conversion blocker
 
-o) more easily implemented scheme functions
-cond
-case
-do
-let
-let.star
-letrec
-for.each
-
 o) macros
 defmacro
 bquote
