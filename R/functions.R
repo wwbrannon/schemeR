@@ -15,6 +15,7 @@ write <- cat
 read <- readline
 expt <- `**`
 reverse <- rev
+member <- `%in%`
 
 is.nil <- is.null
 is.procedure <- is.function
@@ -109,3 +110,28 @@ cddaar <- function(lst) { return(cdr(cdr(car(car(lst))))) }
 cddadr <- function(lst) { return(cdr(cdr(car(cdr(lst))))) }
 cdddar <- function(lst) { return(cdr(cdr(cdr(car(lst))))) }
 cddddr <- function(lst) { return(cdr(cdr(cdr(cdr(lst))))) }
+
+#FIXME
+cond <-
+function(...)
+{
+    args <- list(...)
+
+    for(val in args)
+    {
+        if(is.list(val))
+        {
+            test <- val[[1]]
+            ret <- val[[2]]
+        } else
+        {
+            test <- val[1]
+            ret <- val[2]
+        }
+
+        if(test)
+        {
+            ret
+        }
+    }
+}
