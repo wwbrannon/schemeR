@@ -103,7 +103,18 @@ function(...)
         nm <- as.character(p[[1]])
         if(length(p) == 1)
         {
-            vals[[nm]] <- zeroLengthSymbol()
+            #This one takes some explanation: in building a function by
+            #hand, the formal argument list is passed in to the "function"
+            #constructor as a pairlist, whose tags are used as the argument
+            #names. The values become the argument defaults. If you want an
+            #argument with no default, which will raise an error if missing,
+            #the value that has to be passed in is a zero-length symbol.
+            #There's no obvious way to generate one of these: as.symbol("") and
+            #related constructs all raise errors. But, as it turns out, alist()
+            #returns them for arguments that have a tag but no value. The fact
+            #that this little trick is possible saves us from having to write C
+            #to generate the necessary zero-length name.
+            vals[[nm]] <- alist(x=)$x
         } else
         {
             vals[[nm]] <- p[[2]] #don't eval
