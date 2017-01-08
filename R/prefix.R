@@ -16,10 +16,6 @@
 #' @return \code{prefix} and \code{infix} return the input expression
 #' converted to prefix or infix.
 #'
-#' @section See Also:
-#' \code{\link{prefixFiles}} and \code{\link{infixFiles}} for converting
-#' code found in files.
-#'
 #' @examples
 #' prefix(expression(x <- runif(10), y <- runif(10), cor(x, y)))
 #'
