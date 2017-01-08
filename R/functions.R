@@ -209,7 +209,7 @@ function(...)
     #Don't evaluate the args up front
     args <- eval(substitute(alist(...)))
 
-    ret <- NULL
+    ret <- FALSE
     for(arg in args)
     {
         #only evaluate once in case there are side effects
@@ -228,7 +228,7 @@ function(...)
     #Don't evaluate the args up front
     args <- eval(substitute(alist(...)))
 
-    ret <- NULL
+    ret <- TRUE
     for(arg in args)
     {
         #only evaluate once in case there are side effects
