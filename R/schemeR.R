@@ -1,4 +1,4 @@
-#' schemeR: Ports of Scheme features to R
+#' schemeR: Make R more like Lisp/Scheme
 #'
 #' Provides a way to write R code in a Lisp-like \code{\link{prefix}} form,
 #' with access to versions of many common Lisp operators (let, letrec, cond,

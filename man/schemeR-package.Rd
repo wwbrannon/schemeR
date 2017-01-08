@@ -3,7 +3,7 @@
 \docType{package}
 \name{schemeR-package}
 \alias{schemeR-package}
-\title{schemeR: Ports of Scheme features to R}
+\title{schemeR: Make R more like Lisp/Scheme}
 \description{
 Provides a way to write R code in a Lisp-like \code{\link{prefix}} form,
 with access to versions of many common Lisp operators (let, letrec, cond,

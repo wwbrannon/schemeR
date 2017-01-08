@@ -1,11 +1,12 @@
 Package: schemeR
 Type: Package
 Authors@R: c(person("William", "Brannon", email="wwbrannon@email.wm.edu", role=c("aut", "cre")))
-Title: Ports of Scheme Facilities to R
+Title: Ports of Lisp/Scheme Features to R
 Version: 0.1.0.9000
-Description: Provide R versions of certain language features found in "proper"
-    Scheme dialects, insofar as this is possible without modifying R itself.
-    In particular, provide tools to build Lisp-style macros in R.
+Description: Provides a way to write R code in a Lisp-like prefix form, with
+    access to versions of many common Lisp operators (let, letrec, cond, do,
+    etc.). True Lisp macros are also supported and are optimized to work with
+    this sort of prefix code.
 License: MIT + file LICENSE
 URL: https://github.com/wwbrannon/schemeR
 BugReports: https://github.com/wwbrannon/schemeR/issues
