@@ -4,29 +4,25 @@
 ### the empty list is not nil, because in R, is.null(pairlist()) but not
 ### is.null(list())).
 
-## Aliases for things already available in R under other names
+## Some basic / misc renamings of things R already has
 nil <- NULL
 define <- `<-`
-map <- Map
 display <- print
-cons <- c
-append <- c #not exactly as in scheme, but close
-expt <- `^`
-reverse <- rev
-member <- `%in%`
 progn <- `{`
-nth <- `[`
 fromPkg <- `::`
 
 is.nil <- is.null
 is.procedure <- is.function
-is.number <- is.numeric
 is.boolean <- is.logical
+
+## Numeric functions
+expt <- `^`
+is.number <- is.numeric
 quotient <- `%/%`
 remainder <- `%%`
 modulo <- remainder
 
-## Other numeric functions
+sum <- function(...) { Reduce(`+`, list(...)) }
 is.even <- function(x) { return(x %% 2 == 0) }
 is.odd  <- function(x) { return(x %% 2 == 1) }
 is.zero <- function(x) { return(x == 0) }
@@ -161,12 +157,19 @@ function(f, x)
     return(Filter(Negate(f), x))
 }
 
+map <- Map
+reverse <- rev
+reduce <- Reduce
 keep.matching <- Filter
 keep.matching.items <- keep.matching
 delete.matching.items <- delete.matching
-reduce <- Reduce
 
 ## Type-generic list- or vector-processing functions
+cons <- c
+append <- c #not exactly as in scheme, but close
+nth <- `[`
+member <- `%in%`
+
 is.empty <- function(obj) length(obj) == 0
 
 make.list <-
@@ -193,7 +196,11 @@ cdr <-
 function(lst)
 {
     #Valid for both lists and vectors
-    return(lst[-1])
+    ret <- lst[-1]
+    if(length(ret) != 0)
+        return(ret)
+    else
+        return(NULL)
 }
 
 last <-
