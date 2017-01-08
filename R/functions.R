@@ -233,10 +233,11 @@ function(...)
 
     #The bindings become the formals of the generated function, because
     #function formals can be defined in a mutually recursive way
-    vals <- do.call(alist, lapply(args, function(x) x[[2]]))
+    vals <- lapply(args, function(x) x[[2]])
     names(vals) <- vapply(args, function(x) as.character(x[[1]]), character(1))
 
     fn <- eval(call("function", as.pairlist(vals), body), envir=parent.frame())
+    environment(fn) <- parent.frame()
 
     return(fn())
 }
