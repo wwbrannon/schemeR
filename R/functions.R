@@ -437,3 +437,102 @@ function(...)
 
     return(invisible(NULL))
 }
+
+#.(let, .(x, .(c, 1, 3, 5, 7, 9)),
+#  .(do, .(.(x, .(c, 1, 3, 5, 7, 9), .(cdr, x)),
+#          .(s, 0, .(`+`, s, .(car, x))),
+#          .(foo, 4)),
+#    .(.(is.nil, x), s),
+#    T)) #=> 25
+do <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+
+    if(!(length(args) %in% c(2,3)))
+        stop("Incorrect number of arguments to do")
+
+    #The test-is-false loop body
+    if(length(args) == 3)
+    {
+        cmd <- args[[length(args)]]
+        args <- args[1:(length(args) - 1)]
+    } else
+    {
+        cmd <- quote(NULL)
+    }
+
+    #The test clause
+    tc <- args[[length(args)]]
+    if(!(length(tc) %in% c(1,2)))
+        stop("Invalid test clause for do")
+
+    args <- args[1:(length(args) - 1)]
+
+    test <- tc[[1]]
+    test_expr <- ifelse(length(tc) == 2, tc[[2]], NULL)
+
+    #The bindings and step expressions. If no step expression is given for
+    #a variable "x", make "x" the step expression - it's a no-op that makes
+    #this function's logic slightly simpler.
+    lst <- list()
+    steps <- list()
+
+    args <- rapply(as.list(args), as.list, how="replace")[[1]]
+    for(binding in args)
+    {
+        if(!(length(binding) %in% c(2,3)))
+            stop("Invalid binding for do")
+
+        nm <- as.character(binding[[1]])
+        init <- binding[[2]]
+
+        if(length(binding) == 3)
+        {
+            step <- binding[[3]]
+        } else
+        {
+            step <- as.symbol(nm)
+        }
+
+        lst[[nm]] <- init
+        steps[[nm]] <- step
+    }
+
+    #Evaluate the init expressions, but not (yet) the step expressions
+    nms <- names(lst)
+    lst <- lapply(lst, eval)
+    names(lst) <- nms
+
+    #Begin iteration - each time around the loop, check test and decide
+    #what to do. If needed, eval the step expressions in an environment
+    #partially constructed from lst.
+    while(TRUE)
+    {
+        #FIXME - several places in this file assume that parent.frame()
+        #descends from baseenv()
+        ret <- eval(test, envir=lst, enclos=parent.frame())
+        if(ret)
+        {
+            if(!is.null(test_expr))
+            {
+                return(eval(test_expr, envir=lst, enclos=parent.frame()))
+            } else
+            {
+                return(ret)
+            }
+        } else
+        {
+            #Evaluate this "for effect"
+            eval(cmd, envir=lst, enclos=parent.frame())
+
+            #Update the step expressions, being sure to evaluate them
+            #in a context where the previous values of the bindings are
+            #visible
+            nms <- names(lst)
+            fn <- function(x) eval(x, envir=lst, enclos=parent.frame())
+            lst <- lapply(steps, fn)
+            names(lst) <- nms
+        }
+    }
+}
