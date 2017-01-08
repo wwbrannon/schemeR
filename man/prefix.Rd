@@ -13,7 +13,8 @@ infix(expr)
 .(f, ...)
 }
 \arguments{
-\item{expr}{A prefix- or infix-formatted expression to convert}
+\item{expr}{A prefix- or infix-formatted expression to convert. Code between
+"R(" and ")" will not be converted.}
 
 \item{f}{The function that \code{.} should generate a call to.}
 
