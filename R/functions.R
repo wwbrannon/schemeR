@@ -63,7 +63,7 @@ function(nm, pos, val)
     eval(expr, envir=parent.frame())
 }
 
-set.car <- functional::Curry(set.pos, pos=1)
+set.car <- function(nm, val) set.pos(nm=nm, val=val, pos=1)
 
 set.cdr <-
 function(nm, val)
