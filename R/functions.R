@@ -208,6 +208,39 @@ cddddr <- function(lst) { return(cdr(cdr(cdr(cdr(lst))))) }
 #    .(i, 3),
 #    .(foo, 5),
 #  .(`==`, i, .(`-`, foo, 2)))
+let.star <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+
+    if(length(args) <= 1)
+        stop("Too few arguments to let.star")
+
+    for(a in args[1:(length(args) - 1)])
+        if(length(a) != 2)
+            stop("Invalid let.star binding")
+
+    #The statement we want to evaluate
+    body <- args[[length(args)]]
+    args <- args[1:(length(args) - 1)]
+
+    #We need to "evaluate the bindings sequentially from left to right"
+    env <- new.env(parent=parent.frame())
+    for(arg in args)
+    {
+        nm <- as.character(arg[[1]])
+        val <- eval(arg[[2]], envir=env)
+
+        assign(nm, val, envir=env) #visible for subsequent evaluations
+    }
+
+    eval(body, envir=env)
+}
+
+#.(letrec,
+#    .(i, 3),
+#    .(foo, 5),
+#  .(`==`, i, .(`-`, foo, 2)))
 
 #.(letrec,
 #    .(i, 3),
