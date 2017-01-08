@@ -271,3 +271,23 @@ function(...)
 
     return(invisible(NULL))
 }
+
+#.(cond,
+#  .(.(`==`, .(`+`, 1, 4), 4), .(print, "foo")),
+#  .(.(`==`, .(`+`, 1, 3), 5), .(print, "bar")),
+#  .(TRUE, .(print, "baz")))
+cond <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+
+    for(clause in args)
+    {
+        if(eval(clause[[1]]))
+        {
+            return(eval(clause[[2]]))
+        }
+    }
+
+    return(invisible(NULL))
+}
