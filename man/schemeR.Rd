@@ -5,6 +5,9 @@
 \alias{schemeR}
 \alias{schemeR-package}
 \title{schemeR: Ports of certain Scheme facilities to R}
+\usage{
+schemeR(expr)
+}
 \description{
 The schemeR package provides R versions of certain language features found
 in "proper" Scheme dialects, insofar as this is possible without modifying

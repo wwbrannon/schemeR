@@ -24,3 +24,13 @@
 #' @docType package
 #' @name schemeR
 NULL
+
+#' @rdname schemeR
+#' @export
+schemeR <-
+function(expr)
+{
+    expr <- substitute(expr)
+
+    eval(infix(expr))
+}
