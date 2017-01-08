@@ -1,7 +1,7 @@
 ## Assignment operators
 ## Unlike in Scheme, there's no distinction between creating a binding
-## and assigning a value, so define <=> set.
-set <- define
+## and assigning a value, so define <=> set <=> `<-`.
+set <- `<-`
 
 set.pos <-
 function(nm, pos, val)
