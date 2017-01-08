@@ -6,7 +6,7 @@
 
 ## Aliases for things already available in R under other names
 nil <- NULL
-lambda <- `function`
+lambda <- `function` #FIXME
 define <- `<-`
 map <- Map
 display <- print
@@ -201,6 +201,45 @@ cddaar <- function(lst) { return(cdr(cdr(car(car(lst))))) }
 cddadr <- function(lst) { return(cdr(cdr(car(cdr(lst))))) }
 cdddar <- function(lst) { return(cdr(cdr(cdr(car(lst))))) }
 cddddr <- function(lst) { return(cdr(cdr(cdr(cdr(lst))))) }
+
+## Lexical binding
+
+#.(letrec,
+#    .(i, 3),
+#    .(foo, 5),
+#  .(`==`, i, .(`-`, foo, 2)))
+
+#.(letrec,
+#    .(i, 3),
+#    .(foo, .(lambda, .(n), .(`+`, n, 1))),
+#  .(`==`, i, .(foo, 2)))
+
+letrec <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+
+    if(length(args) <= 1)
+        stop("Too few arguments to letrec")
+
+    for(a in args[1:(length(args) - 1)])
+        if(length(a) != 2)
+            stop("Invalid letrec binding")
+
+    #We should evaluate the last statement passed with the caller's context
+    #as environment - make this the body of the function built below
+    body <- args[[length(args)]]
+    args <- args[1:(length(args) - 1)]
+
+    #The bindings become the formals of the generated function, because
+    #function formals can be defined in a mutually recursive way
+    vals <- do.call(alist, lapply(args, function(x) x[[2]]))
+    names(vals) <- vapply(args, function(x) as.character(x[[1]]), character(1))
+
+    fn <- eval(call("function", as.pairlist(vals), body), envir=parent.frame())
+
+    return(fn())
+}
 
 ## Flow-control operators
 or <-
