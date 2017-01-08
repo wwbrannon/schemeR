@@ -10,7 +10,8 @@
 #' partial evaluation of the passed expression: each call to \code{.} is
 #' evaluated to the corresponding infix call.
 #'
-#' @param expr A prefix- or infix-formatted expression to convert
+#' @param expr A prefix- or infix-formatted expression to convert. Code between
+#' "R(" and ")" will not be converted.
 #'
 #' @return \code{prefix} and \code{infix} return the input expression
 #' converted to prefix or infix.
