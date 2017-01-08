@@ -204,7 +204,36 @@ cddddr <- function(lst) { return(cdr(cdr(cdr(cdr(lst))))) }
 
 ## Lexical binding
 
-#.(letrec,
+#.(let,
+#    .(i, 3),
+#    .(foo, 5),
+#  .(`==`, i, .(`-`, foo, 2)))
+let <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+
+    if(length(args) <= 1)
+        stop("Too few arguments to let")
+
+    for(a in args[1:(length(args) - 1)])
+        if(length(a) != 2)
+            stop("Invalid let binding")
+
+    #The statement we want to evaluate
+    body <- args[[length(args)]]
+    args <- args[1:(length(args) - 1)]
+
+    #We need to evaluate all the inits before setting any of the variables;
+    #this is not necessarily the same as evaluating them all with parent
+    #parent.frame() rather than env, because they may have side effects.
+    vals <- lapply(args, function(x) eval(x[[2]], envir=parent.frame()))
+    names(vals) <- vapply(args, function(x) as.character(x[[1]]), character(1))
+
+    eval(body, envir=vals, enclos=parent.frame())
+}
+
+#.(let.star,
 #    .(i, 3),
 #    .(foo, 5),
 #  .(`==`, i, .(`-`, foo, 2)))
