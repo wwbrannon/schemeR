@@ -240,3 +240,34 @@ function(...)
 
     return(ret)
 }
+
+#.(case, .(`+`, 1, 1),
+#  .(3, .(print, "foo")),
+#  .(2, .(print, "bar")))
+case <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+    if(length(args) <= 1)
+        stop("Too few arguments to case")
+
+    #The "key"
+    val <- eval(args[[1]])
+    args <- args[2:length(args)]
+
+    for(i in seq_along(args))
+    {
+        clause <- args[[i]]
+
+        if(length(clause) != 2)
+            stop("Malformed case clause")
+
+        for(obj in eval(clause[[1]]))
+        {
+            if(isTRUE(all.equal(val, obj)))
+                return(eval(clause[[2]]))
+        }
+    }
+
+    return(invisible(NULL))
+}
