@@ -1,5 +1,3 @@
-o) the R() conversion blocker
-
 o) macros
 defmacro
 bquote

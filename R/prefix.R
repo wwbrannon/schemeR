@@ -36,6 +36,16 @@ function(expr)
         return(as.expression(lst))
     } else if(is.call(expr))
     {
+        if(expr[[1]] == as.symbol("R"))
+        {
+            if(length(expr) != 2)
+            {
+                stop("R() must have exactly one argument")
+            }
+
+            return(expr[[2]])
+        }
+
         lst <- lapply(as.list(expr), prefix)
         lst <- c(as.symbol("."), lst)
 
@@ -65,6 +75,18 @@ function(expr)
         return(as.expression(lst))
     } else if(is.call(expr))
     {
+        if(expr[[1]] == as.symbol("R"))
+        {
+            if(length(expr) != 2)
+            {
+                stop("R() must have exactly one argument")
+            }
+
+            #Don't convert this - allow embedding R code in the usual infix
+            #style in blocks of prefix code
+            return(expr[[2]])
+        }
+
         if(expr[[1]] == as.symbol("."))
         {
             env <- new.env(parent=emptyenv())
