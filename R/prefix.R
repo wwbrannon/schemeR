@@ -47,6 +47,12 @@ function(expr)
             return(expr[[2]])
         }
 
+        #Already prefix-ified code should be idempotent under this function
+        if(expr[[1]] == as.symbol("."))
+        {
+            return(as.call(lapply(as.list(expr), prefix)))
+        }
+
         lst <- lapply(as.list(expr), prefix)
         lst <- c(as.symbol("."), lst)
 
