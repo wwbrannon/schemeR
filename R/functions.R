@@ -6,7 +6,6 @@
 
 ## Aliases for things already available in R under other names
 nil <- NULL
-lambda <- `function` #FIXME
 define <- `<-`
 map <- Map
 display <- print
@@ -82,6 +81,45 @@ function(nm, val)
 }
 
 ## Functional operators
+lambda <-
+function(...)
+{
+    args <- eval(substitute(alist(...)))
+
+    if(length(args) != 2)
+        stop("Incorrect number of arguments to lambda")
+
+    #This is easy; putting the formals together is harder
+    body <- args[[2]]
+
+    #In this case and a few others we don't want to
+    #take the infix form of a .(...) as a call, so let's
+    #just turn it back into a list. This is a little gross,
+    #but there's no good way to do it.
+    params <- rapply(as.list(args[[1]]), as.list, how="replace")
+
+    vals <- list()
+    for(p in params)
+    {
+        if(!(length(p) %in% c(1,2)))
+            stop("Invalid lambda argument list")
+
+        nm <- as.character(p[[1]])
+        if(length(p) == 1)
+        {
+            vals[[nm]] <- zeroLengthSymbol()
+        } else
+        {
+            vals[[nm]] <- p[[2]] #don't eval
+        }
+    }
+
+    fn <- eval(call("function", as.pairlist(vals), body), envir=parent.frame())
+    environment(fn) <- parent.frame()
+
+    fn
+}
+
 member.if <-
 function(f, x, k=identity)
 {
@@ -275,7 +313,6 @@ function(...)
 #    .(i, 3),
 #    .(foo, .(lambda, .(n), .(`+`, n, 1))),
 #  .(`==`, i, .(foo, 2)))
-
 letrec <-
 function(...)
 {
