@@ -1,9 +1,18 @@
 ## Lexical binding
 
-#.(let,
-#    .(i, 3),
-#    .(foo, 5),
-#  .(`==`, i, .(`-`, foo, 2)))
+#FIXME: the bindings should all be under one list
+#FIXME: better / more function-specific examples
+#FIXME: various operators should take multiple expressions rather than just one
+
+#'
+#' @examples
+#' schemeR::schemeR({
+#'.(let,
+#'    .(i, 3),
+#'    .(foo, 5),
+#'  .(`==`, i, .(`-`, foo, 2)))
+#'  }, pkg=TRUE)
+#' @rdname lexical
 #' @export
 let <-
 function(...)
@@ -30,10 +39,15 @@ function(...)
     eval(body, envir=vals, enclos=parent.frame())
 }
 
-#.(let.star,
-#    .(i, 3),
-#    .(foo, 5),
-#  .(`==`, i, .(`-`, foo, 2)))
+#'
+#' @examples
+#' schemeR::schemeR({
+#' .(let.star,
+#'     .(i, 3),
+#'     .(foo, 5),
+#'   .(`==`, i, .(`-`, foo, 2)))
+#'  }, pkg=TRUE)
+#' @rdname lexical
 #' @export
 let.star <-
 function(...)
@@ -64,15 +78,22 @@ function(...)
     eval(body, envir=env)
 }
 
-#.(letrec,
-#    .(i, 3),
-#    .(foo, 5),
-#  .(`==`, i, .(`-`, foo, 2)))
-
-#.(letrec,
-#    .(i, 3),
-#    .(foo, .(lambda, .(n), .(`+`, n, 1))),
-#  .(`==`, i, .(foo, 2)))
+#'
+#' @examples
+#' schemeR::schemeR({
+#' .(letrec,
+#'     .(i, 3),
+#'     .(foo, 5),
+#'   .(`==`, i, .(`-`, foo, 2)))
+#'  }, pkg=TRUE)
+#'
+#' schemeR::schemeR({
+#' .(letrec,
+#'     .(i, 3),
+#'     .(foo, .(lambda, .(n), .(`+`, n, 1))),
+#'   .(`==`, i, .(foo, 2)))
+#'  }, pkg=TRUE)
+#' @rdname lexical
 #' @export
 letrec <-
 function(...)
