@@ -72,9 +72,80 @@ function(expr)
 infix <-
 function(expr)
 {
+    s1 <- infix_transform_dots(expr)
+    s2 <- infix_transform_quotes(s1)
+
+    return(s2)
+}
+
+# Stage 2 of prefix=>infix processing
+#
+# This function takes the output of stage 1 (infix_transform_dots), which has
+# had "." removed, and then handles a few additional pieces of syntactic
+# sugar: ".q" is transformed into a call to base R's quote(), and .b is
+# transformed into a call to our quasiquote(), which is like Scheme's
+# quasiquote in that it handles by comma (written ".c" here) and comma-at
+# (written ".s" for "splice"). The R() construction is again respected and
+# expressions so escaped are not modified. (R's bquote is not quite powerful
+# enough, so we had to roll our own quasiquote function.)
+#
+# @param expr The expression to process
+#
+# @return The transformed expression in infix syntax
+infix_transform_quotes <-
+function(expr)
+{
     if(is.expression(expr))
     {
-        lst <- lapply(as.list(expr), infix)
+        lst <- lapply(as.list(expr), infix_transform_quotes)
+        return(as.expression(lst))
+    } else if(is.call(expr))
+    {
+        #We still need to avoid modifying this in stage 2
+        if(expr[[1]] == as.symbol("R"))
+        {
+            if(length(expr) != 2)
+            {
+                stop("R() must have exactly one argument")
+            }
+
+            return(expr[[2]])
+        } else if(expr[[1]] == as.symbol(".q"))
+        {
+            lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
+            return(as.call(list(as.symbol("quote"), lst)))
+        } else if(expr[[1]] == as.symbol(".b"))
+        {
+            lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
+            return(as.call(list(as.symbol("quasiquote"), lst)))
+        } else
+        {
+            lst <- lapply(as.list(expr), infix_transform_quotes)
+            return(as.call(lst))
+        }
+    } else
+    {
+        return(expr)
+    }
+}
+
+# Stage 1 of prefix=>infix processing
+#
+# This function takes an expression in full Lisp-like prefix syntax and does
+# a few types of processing to bring it closer to the usual R infix syntax.
+# First, calls to "." are evaluated and expand to match.call()[-1], but any
+# occurrences of the R() construction are not modified.
+#
+# @param expr The expression to process
+#
+# @return The transformed expression in a form suitable for passing on to
+# infix_remove_quotes
+infix_transform_dots <-
+function(expr)
+{
+    if(is.expression(expr))
+    {
+        lst <- lapply(as.list(expr), infix_transform_dots)
         return(as.expression(lst))
     } else if(is.call(expr))
     {
@@ -98,7 +169,7 @@ function(expr)
             expr <- eval(expr, envir=env)
         }
 
-        lst <- lapply(as.list(expr), infix)
+        lst <- lapply(as.list(expr), infix_transform_dots)
         return(as.call(lst))
     } else
     {
@@ -130,4 +201,69 @@ function(expr)
 function(f, ...)
 {
     match.call()[-1]
+}
+
+#' Partial quoting in expressions
+#'
+#' A reimplementation of the backquote macro from Lisp/Scheme, with more
+#' functionality than the base \code{bquote} function. quasiquote quotes
+#' its argument, except for two kinds of user-requested evaluation and
+#' interpolation.
+#'
+#' Unlike the bquote() found in base R, this version handles both of the types
+#' of unquoting Lisp provides:
+#' \itemize{
+#' \item{terms wrapped in \code{.c()} are evaluated in the environment given
+#' by \code{where}. This feature replicates Lisp's \code{unquote}, or the
+#' comma notation, and behaves identically to \code{bquote}'s \code{.()}.}
+#' \item{terms wrapped in \code{.s()} are evaluated in the environment given
+#' by \code{where}, are assumed to evaluate to a list or pairlist, and the
+#' elements of that list or pairlist are spliced into the expression where
+#' the \code{.s()} occurred. This feature replicates Lisp's
+#' \code{unquote-splicing}, or the comma-at notation.}
+#' }
+#'
+#' @param expr The expression to be partially quoted.
+#' @param where The environment in which any evaluation should occur.
+#'
+#' @return The quoted expr, with partial evaluation and substitution done.
+#'
+#' @export
+quasiquote <-
+function(expr, where=parent.frame())
+{
+    expr <- substitute(expr)
+
+    unquote <-
+        function(e)
+        {
+            if (length(e) <= 1)
+            {
+                e
+            }
+            else if (e[[1]] == as.symbol(".c"))
+            {
+                if(length(e) > 2)
+                    stop("Too many arguments to .c")
+
+                eval(e[[2]], envir=where)
+            }
+            else if (e[[1]] == as.symbol(".s"))
+            {
+                if(length(e) > 2)
+                    stop("Too many arguments to .s")
+
+                ret <- eval(e[[2]], envir=where)
+                #FIXME
+            }
+            else if(is.pairlist(e))
+            {
+                as.pairlist(lapply(e, unquote))
+            } else
+            {
+                as.call(lapply(e, unquote))
+            }
+        }
+
+    unquote(expr)
 }
