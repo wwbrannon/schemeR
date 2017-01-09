@@ -56,8 +56,7 @@ schemeR::schemeR({
   .(do, .(.(x, .(c, 1, 3, 5, 7, 9), .(cdr, x)),
           .(s, 0, .(`+`, s, .(car, x))),
           .(foo, 4)),
-    .(.(is.nil, x), s),
-    T))
+    .(.(is.nil, x), s)))
 }, pkg=TRUE) #=> 25
 
 require(schemeR)
