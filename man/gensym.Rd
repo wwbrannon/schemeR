@@ -17,9 +17,9 @@ gensym(str = "G", envir = parent.frame(), len = 10)
 The generated symbol.
 }
 \description{
-\code{gensym} is an analogue of Common Lisp's gensym. It builds symbols
-which are guaranteed not to shadow or conflict with bindings already defined
-in an environment, for use in writing macros.
+\code{gensym} is an analogue of Common Lisp's gensym, for use in writing
+macros. It builds symbols which are guaranteed not to shadow or conflict
+with bindings already defined in an environment.
 }
 \details{
 \code{gensym} provides some additional control over the form of the symbol

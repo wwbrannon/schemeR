@@ -4,9 +4,9 @@
 
 #' Build a temporary symbol
 #'
-#' \code{gensym} is an analogue of Common Lisp's gensym. It builds symbols
-#' which are guaranteed not to shadow or conflict with bindings already defined
-#' in an environment, for use in writing macros.
+#' \code{gensym} is an analogue of Common Lisp's gensym, for use in writing
+#' macros. It builds symbols which are guaranteed not to shadow or conflict
+#' with bindings already defined in an environment.
 #'
 #' \code{gensym} provides some additional control over the form of the symbol
 #' it generates: the user can specify how long the symbol should be (though
