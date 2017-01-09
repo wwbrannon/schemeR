@@ -1,4 +1,6 @@
 ## Functional operators
+
+#' @export
 lambda <-
 function(...)
 {
@@ -49,6 +51,7 @@ function(...)
     fn
 }
 
+#' @export
 member.if <-
 function(f, x, k=identity)
 {
@@ -61,6 +64,7 @@ function(f, x, k=identity)
     return(list())
 }
 
+#' @export
 zip <-
 function(...)
 {
@@ -71,6 +75,7 @@ function(...)
     return(do.call(mapply, args))
 }
 
+#' @export
 for.each <-
 function(f, ...)
 {
@@ -84,16 +89,27 @@ function(f, ...)
     return(invisible(NULL))
 }
 
+#' @export
 delete.matching <-
 function(f, x)
 {
     return(Filter(Negate(f), x))
 }
 
+#' @export
 map <- Map
-reverse <- rev
-reduce <- Reduce
-keep.matching <- Filter
-keep.matching.items <- keep.matching
-delete.matching.items <- delete.matching
 
+#' @export
+reverse <- rev
+
+#' @export
+reduce <- Reduce
+
+#' @export
+keep.matching <- Filter
+
+#' @export
+keep.matching.items <- keep.matching
+
+#' @export
+delete.matching.items <- delete.matching

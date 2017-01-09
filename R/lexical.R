@@ -4,6 +4,7 @@
 #    .(i, 3),
 #    .(foo, 5),
 #  .(`==`, i, .(`-`, foo, 2)))
+#' @export
 let <-
 function(...)
 {
@@ -33,6 +34,7 @@ function(...)
 #    .(i, 3),
 #    .(foo, 5),
 #  .(`==`, i, .(`-`, foo, 2)))
+#' @export
 let.star <-
 function(...)
 {
@@ -71,6 +73,7 @@ function(...)
 #    .(i, 3),
 #    .(foo, .(lambda, .(n), .(`+`, n, 1))),
 #  .(`==`, i, .(foo, 2)))
+#' @export
 letrec <-
 function(...)
 {

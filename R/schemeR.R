@@ -43,11 +43,9 @@ NULL
 #'
 #' @param pkg If \code{FALSE}, call \code{eval()} with its defaults,
 #' \code{envir=parent.frame()} and \code{enclos=baseenv()}. If \code{TRUE},
-#' use \code{envir=parent.frame()} but \code{enclos=getNamespace("schemeR")}.
-#' Note in particular that because the package namespace environment descends
-#' from baseenv() and the base package namespace environment, base functions
-#' will still be accessible regardless of what environments the parent frame
-#' descends from. The motivation for this odd semantics is to allow expr to
+#' use \code{envir=parent.frame()} but make an enclos environment containing
+#' all objects from the package namespace environment and descending from
+#' baseenv(). The motivation for this odd semantics is to allow expr to
 #' refer to the many exported functions that are standard in Lisp/Scheme
 #' (let, letrec, do, cond, etc.) without having to either use the \code{::}
 #' operator (which goes against the spirit of Lisp-like prefix code) or
@@ -96,9 +94,19 @@ function(expr, pkg=FALSE)
 
     envir <- parent.frame()
     if(!is.null(pkg) && pkg)
-        enclos <- getNamespace("schemeR")
+    {
+        enclos <- new.env(parent=baseenv())
+        lst <- as.list(getNamespace("schemeR"), all.names=TRUE)
+        for(i in seq_along(lst))
+        {
+            nm <- names(lst)[i]
+            assign(nm, lst[[nm]], envir=enclos)
+        }
+    }
     else
+    {
         enclos <- baseenv()
+    }
 
     eval(infix(expr), envir=envir, enclos=enclos)
 }

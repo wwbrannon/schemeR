@@ -1,4 +1,5 @@
 ## Flow-control operators
+#' @export
 or <-
 function(...)
 {
@@ -18,6 +19,7 @@ function(...)
     return(ret)
 }
 
+#' @export
 and <-
 function(...)
 {
@@ -40,6 +42,7 @@ function(...)
 #.(case, .(`+`, 1, 1),
 #  .(3, .(print, "foo")),
 #  .(2, .(print, "bar")))
+#' @export
 case <-
 function(...)
 {
@@ -72,6 +75,7 @@ function(...)
 #  .(.(`==`, .(`+`, 1, 4), 4), .(print, "foo")),
 #  .(.(`==`, .(`+`, 1, 3), 5), .(print, "bar")),
 #  .(TRUE, .(print, "baz")))
+#' @export
 cond <-
 function(...)
 {
@@ -94,6 +98,7 @@ function(...)
 #          .(foo, 4)),
 #    .(.(is.nil, x), s),
 #    T)) #=> 25
+#' @export
 do <-
 function(...)
 {
