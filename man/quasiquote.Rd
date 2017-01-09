@@ -18,7 +18,7 @@ The quoted expr, with partial evaluation and substitution done.
 A reimplementation of the backquote macro from Lisp/Scheme, with more
 functionality than the base \code{bquote} function. quasiquote quotes
 its argument, except for two kinds of user-requested evaluation and
-interpolation.
+interpolation. Adapted from base R's \code{bquote}.
 }
 \details{
 Unlike the bquote() found in base R, this version handles both of the types
@@ -33,5 +33,10 @@ elements of that list or pairlist are spliced into the expression where
 the \code{.s()} occurred. This feature replicates Lisp's
 \code{unquote-splicing}, or the comma-at notation.}
 }
+}
+\section{Warning}{
+
+Splicing unquote via \code{.s()} works on a purely lexical basis, and unlike
+in Lisp, there is no guarantee the resulting object will make any sense.
 }
 

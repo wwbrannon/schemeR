@@ -2,21 +2,6 @@
 ## This is the non-hygienic version of macros, based on defmacro() as in
 ## Common Lisp, rather than on syntax objects and syntax-case.
 
-## Because normal Lisps have so much more permissive rules about what is and
-## isn't a syntactic name, we can't use exactly the same names for quote,
-## backquote, comma and comma-at. But it's extremely convenient to be able to
-## refer to these things with short syntactic constructs, especially in macro
-## definitions, so we'll give them alternate names:
-##     quote ('): .q
-##     backquote (`): .b
-##     comma (,): .c
-##     comma-at (,@): .s (for "splice")
-## and use these names in lieu of the "." that otherwise begins all lists in
-## our prefix syntax.
-##
-## Sharp-quote is unnecessary because, as in Scheme but contra Common Lisp,
-## lambda is evaluable and evaluates directly to a function object.
-
 #Build a temporary symbol, making sure it's not included in
 #the list of bindings already in some environment, and prepend
 #a prefix.

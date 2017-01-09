@@ -1,5 +1,21 @@
 ## Allow writing R code in a prefix style, like Lisp
 
+## Quoting is all handled in this file:
+## Because normal Lisps have so much more permissive rules about what is and
+## isn't a syntactic name, we can't use exactly the same names for quote,
+## backquote, comma and comma-at. But it's extremely convenient to be able to
+## refer to these things with short syntactic constructs, especially in macro
+## definitions, so we'll give them alternate names:
+##     quote ('): .q
+##     backquote (`): .b
+##     comma (,): .c
+##     comma-at (,@): .s (for "splice")
+## and use these names in lieu of the "." that otherwise begins all lists in
+## our prefix syntax.
+##
+## Sharp-quote is unnecessary because, as in Scheme but contra Common Lisp,
+## lambda is evaluable and evaluates directly to a function object.
+
 #' Facilities for writing R code in prefix notation
 #'
 #' \code{prefix} and \code{infix} convert R code between the usual infix
@@ -208,7 +224,7 @@ function(f, ...)
 #' A reimplementation of the backquote macro from Lisp/Scheme, with more
 #' functionality than the base \code{bquote} function. quasiquote quotes
 #' its argument, except for two kinds of user-requested evaluation and
-#' interpolation.
+#' interpolation. Adapted from base R's \code{bquote}.
 #'
 #' Unlike the bquote() found in base R, this version handles both of the types
 #' of unquoting Lisp provides:
@@ -223,6 +239,10 @@ function(f, ...)
 #' \code{unquote-splicing}, or the comma-at notation.}
 #' }
 #'
+#' @section Warning:
+#' Splicing unquote via \code{.s()} works on a purely lexical basis, and unlike
+#' in Lisp, there is no guarantee the resulting object will make any sense.
+#'
 #' @param expr The expression to be partially quoted.
 #' @param where The environment in which any evaluation should occur.
 #'
@@ -235,35 +255,47 @@ function(expr, where=parent.frame())
     expr <- substitute(expr)
 
     unquote <-
-        function(e)
+    function(e)
+    {
+        if (length(e) <= 1)
         {
-            if (length(e) <= 1)
-            {
-                e
-            }
-            else if (e[[1]] == as.symbol(".c"))
-            {
-                if(length(e) > 2)
-                    stop("Too many arguments to .c")
-
-                eval(e[[2]], envir=where)
-            }
-            else if (e[[1]] == as.symbol(".s"))
-            {
-                if(length(e) > 2)
-                    stop("Too many arguments to .s")
-
-                ret <- eval(e[[2]], envir=where)
-                #FIXME
-            }
-            else if(is.pairlist(e))
-            {
-                as.pairlist(lapply(e, unquote))
-            } else
-            {
-                as.call(lapply(e, unquote))
-            }
+            return(e)
         }
+        else if (e[[1]] == as.symbol(".c") || e[[1]] == as.symbol(".s"))
+        {
+            #.c and .s are both handled identically here, but see below
+            if(length(e) > 2)
+                stop(paste0("Too many arguments to ", as.character(e[[1]])))
+
+            return(eval(e[[2]], envir=where))
+        }
+        else if(is.pairlist(e))
+        {
+            return(as.pairlist(lapply(e, unquote)))
+        } else
+        {
+            ret <- lapply(e, unquote)
+
+            #FIXME
+            for(i in seq_along(e))
+            {
+                if(e[[i]] == ".s")
+                {
+                    alt <- ret[[i]]
+
+                    #Splice it in
+                    if(i > 1)
+                        alt <- c(ret[1:(i - 1)], alt)
+                    if(i < length(ret))
+                        alt <- c(alt, ret[(i + 1):length(ret)])
+
+                    return(alt)
+                }
+            }
+
+            return(as.call(ret))
+        }
+    }
 
     unquote(expr)
 }
