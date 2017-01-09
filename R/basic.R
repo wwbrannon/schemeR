@@ -9,6 +9,9 @@ display <- print
 progn <- `{`
 
 #' @export
+begin <- progn
+
+#' @export
 fromPkg <- `::`
 
 #' @export
