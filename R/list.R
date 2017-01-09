@@ -3,9 +3,6 @@
 cons <- c
 
 #' @export
-append <- c #not exactly as in scheme, but close
-
-#' @export
 nth <- `[`
 
 #' @export
