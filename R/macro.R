@@ -1,4 +1,6 @@
 ## A Lisp-like macro facility for R
+## This is the non-hygienic version of macros, based on defmacro() as in
+## Common Lisp, rather than on syntax objects and syntax-case.
 
 ## Because normal Lisps have so much more permissive rules about what is and
 ## isn't a syntactic name, we can't use exactly the same names for quote,
@@ -22,8 +24,16 @@
 gensym <-
 function(str="G", envir=parent.frame(), len=10)
 {
+    nc <- nchar(str)
+
+    if(length(str) > 1)
+        stop("Too many prefixes specified")
     if(len <= 0)
         stop("Symbol length must be positive")
+    if(nc >= len)
+        stop("Prefix must have fewer than len characters")
+
+    len <- len - nc
 
     lst <- as.list(envir)
 
