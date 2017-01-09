@@ -28,10 +28,10 @@ of unquoting Lisp provides:
 by \code{where}. This feature replicates Lisp's \code{unquote}, or the
 comma notation, and behaves identically to \code{bquote}'s \code{.()}.}
 \item{terms wrapped in \code{.s()} are evaluated in the environment given
-by \code{where}, are assumed to evaluate to a list or pairlist, and the
-elements of that list or pairlist are spliced into the expression where
-the \code{.s()} occurred. This feature replicates Lisp's
-\code{unquote-splicing}, or the comma-at notation.}
+by \code{where}, are assumed to evaluate to a list, pairlist or vector,
+and its elements are spliced into the expression where the \code{.s()}
+occurred. This feature replicates Lisp's \code{unquote-splicing}, or the
+comma-at notation.}
 }
 }
 \section{Warning}{

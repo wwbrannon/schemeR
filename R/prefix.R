@@ -233,10 +233,10 @@ function(f, ...)
 #' by \code{where}. This feature replicates Lisp's \code{unquote}, or the
 #' comma notation, and behaves identically to \code{bquote}'s \code{.()}.}
 #' \item{terms wrapped in \code{.s()} are evaluated in the environment given
-#' by \code{where}, are assumed to evaluate to a list or pairlist, and the
-#' elements of that list or pairlist are spliced into the expression where
-#' the \code{.s()} occurred. This feature replicates Lisp's
-#' \code{unquote-splicing}, or the comma-at notation.}
+#' by \code{where}, are assumed to evaluate to a list, pairlist or vector,
+#' and its elements are spliced into the expression where the \code{.s()}
+#' occurred. This feature replicates Lisp's \code{unquote-splicing}, or the
+#' comma-at notation.}
 #' }
 #'
 #' @section Warning:
@@ -274,26 +274,21 @@ function(expr, where=parent.frame())
             return(as.pairlist(lapply(e, unquote)))
         } else
         {
+            alt <- list()
             ret <- lapply(e, unquote)
 
-            #FIXME
             for(i in seq_along(e))
             {
-                if(e[[i]] == ".s")
+                if(length(e[[i]]) > 1 && e[[i]][[1]] == ".s")
                 {
-                    alt <- ret[[i]]
-
-                    #Splice it in
-                    if(i > 1)
-                        alt <- c(ret[1:(i - 1)], alt)
-                    if(i < length(ret))
-                        alt <- c(alt, ret[(i + 1):length(ret)])
-
-                    return(alt)
+                    alt <- c(alt, ret[[i]])
+                } else
+                {
+                    alt[[length(alt) + 1]] <- ret[[i]]
                 }
             }
 
-            return(as.call(ret))
+            return(as.call(alt))
         }
     }
 
