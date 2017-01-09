@@ -3,9 +3,6 @@
 nil <- NULL
 
 #' @export
-define <- `<-`
-
-#' @export
 display <- print
 
 #' @export

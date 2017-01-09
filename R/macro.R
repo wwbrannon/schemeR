@@ -5,10 +5,10 @@
 ## backquote, comma and comma-at. But it's extremely convenient to be able to
 ## refer to these things with short syntactic constructs, especially in macro
 ## definitions, so we'll give them alternate names:
-##     quote: .q
-##     backquote: .b
-##     comma: .c
-##     comma-at: .s (for "splice")
+##     quote ('): .q
+##     backquote (`): .b
+##     comma (,): .c
+##     comma-at (,@): .s (for "splice")
 ## and use these names in lieu of the "." that otherwise begins all lists in
 ## our prefix syntax.
 ##
@@ -18,6 +18,7 @@
 #Build a temporary symbol, making sure it's not included in
 #the list of bindings already in some environment, and prepend
 #a prefix.
+#' @export
 gensym <-
 function(str="G", envir=parent.frame(), len=10)
 {
@@ -49,5 +50,3 @@ function(str="G", envir=parent.frame(), len=10)
 
     return(as.symbol(paste0(str, nm)))
 }
-
-#defmacro

@@ -2,8 +2,8 @@
 #'
 #' Provides a way to write R code in a Lisp-like \code{\link{prefix}} form,
 #' with access to versions of many common Lisp operators (let, letrec, cond,
-#' do, etc.). True Lisp macros are also supported and are optimized to work
-#' with this sort of prefix code.
+#' do, etc.). True (defmacro-based, rather than syntax-case) Lisp macros are
+#' also supported and are optimized to work with this sort of prefix code.
 #'
 #' @section Interface functions:
 #' The main entry point is the \code{schemeR()} function, which translates

@@ -5,8 +5,8 @@ Title: Ports of Lisp/Scheme Features to R
 Version: 0.1.0.9000
 Description: Provides a way to write R code in a Lisp-like prefix form, with
     access to versions of many common Lisp operators (let, letrec, cond, do,
-    etc.). True Lisp macros are also supported and are optimized to work with
-    this sort of prefix code.
+    etc.). True Lisp macros (defmacro-based, rather than syntax-case) are
+    also supported and are optimized to work with this sort of prefix code.
 License: MIT + file LICENSE
 URL: https://github.com/wwbrannon/schemeR
 BugReports: https://github.com/wwbrannon/schemeR/issues

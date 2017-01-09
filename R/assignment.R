@@ -1,9 +1,16 @@
 ## Assignment operators
 ## Unlike in Scheme, there's no distinction between creating a binding
-## and assigning a value, so define <=> set <=> `<-`.
-#' @export
-set <- `<-`
+## and assigning a value, so define <=> set.
 
+#' @rdname schemeR-assignment
+#' @export
+define <- `<-`
+
+#' @rdname schemeR-assignment
+#' @export
+set <- define
+
+#' @rdname schemeR-assignment
 #' @export
 set.pos <-
 function(nm, pos, val)
@@ -21,9 +28,11 @@ function(nm, pos, val)
     eval(expr, envir=parent.frame())
 }
 
+#' @rdname schemeR-assignment
 #' @export
 set.car <- function(nm, val) set.pos(nm=nm, val=val, pos=1)
 
+#' @rdname schemeR-assignment
 #' @export
 set.cdr <-
 function(nm, val)
