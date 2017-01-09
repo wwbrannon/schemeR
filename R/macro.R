@@ -2,9 +2,24 @@
 ## This is the non-hygienic version of macros, based on defmacro() as in
 ## Common Lisp, rather than on syntax objects and syntax-case.
 
-#Build a temporary symbol, making sure it's not included in
-#the list of bindings already in some environment, and prepend
-#a prefix.
+#' Build a temporary symbol
+#'
+#' \code{gensym} is an analogue of Common Lisp's gensym. It builds symbols
+#' which are guaranteed not to shadow or conflict with bindings already defined
+#' in an environment, for use in writing macros.
+#'
+#' \code{gensym} provides some additional control over the form of the symbol
+#' it generates: the user can specify how long the symbol should be (though
+#' asking for length-1 unique symbols is unlikely to be useful), and ask for a
+#' particular string to be prepended for ease of processing or as even more
+#' insurance against name conflicts (perhaps relative to other environments).
+#'
+#' @param str A string to prepend to the generated symbol name.
+#' @param envir The environment the symbol should be unique in.
+#' @param len How long (in characters) the symbol should be.
+#'
+#' @return The generated symbol.
+#'
 #' @export
 gensym <-
 function(str="G", envir=parent.frame(), len=10)
