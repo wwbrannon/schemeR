@@ -1,5 +1,8 @@
 ## Functional operators
 
+#FIXME: compose
+#FIXME: curry/uncurry
+
 #' @export
 lambda <-
 function(...)
