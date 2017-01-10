@@ -3,6 +3,7 @@
 #FIXME: compose and curry should set srcref attributes so that they
 #pretty-print in a non-crazy way
 #FIXME: zip is producing warnings from mapply
+#FIXME: lambda is not returning functions correctly
 
 #' Compose functions
 #'
@@ -25,6 +26,10 @@
 #' symbol arguments.
 #'
 #' @return A function representing the composition of the arguments.
+#'
+#' @seealso
+#' \code{\link{curry}}, \code{\link{lazy.curry}} and \code{\link{uncurry}},
+#' which are frequently useful in conjunction with \code{compose}.
 #'
 #' @examples
 #' f <- function(x) x+1
@@ -89,6 +94,10 @@ function(..., where=parent.frame())
 #' Currying is named after the mathematician
 #' \href{http://en.wikipedia.org/wiki/Haskell_Curry}{Haskell Curry}.
 #'
+#' @seealso
+#' \code{\link{compose}}, which is frequently useful in conjunction with the
+#' currying and uncurrying functions.
+#'
 #' @examples
 #' #Equivalent
 #' f <- function(x) x + 6
@@ -145,6 +154,34 @@ function(f)
     get(as.character(body(f)[[2]]), envir=environment(f), inherits=FALSE)
 }
 
+#' Construct an anonymous function in infix code
+#'
+#' This function provides the Lisp/Scheme lambda form for defining anonymous
+#' functions. Its behavior is very similar to R's "function" keyword, but it
+#' interprets its arguments in a way that allows it to be used naturally in
+#' prefix code. It is not intended to be called the usual way from infix R
+#' code.
+#'
+#' Because R is a Scheme dialect, this lambda is directly evaluable and
+#' evaluates to a function object. Common Lisp's sharp-quote operator is not
+#' necessary and not provided.
+#'
+#' @param ... The infix form of prefix arguments.
+#'
+#' @return The constructed function.
+#'
+#' @examples
+#' schemeR::schemeR({
+#' .(map, .(lambda, .(n), .(paste0, n, "\n")),
+#'        .(list, "a", "b"))
+#' }, pkg=TRUE)
+#'
+#' schemeR::schemeR({
+#' .(letrec, .(.(i, 3),
+#'             .(foo, .(lambda, .(n), .(`+`, n, 1)))),
+#'      .(`==`, i, .(foo, 2)))
+#' }, pkg=TRUE)
+#'
 #' @export
 lambda <-
 function(...)
@@ -214,6 +251,10 @@ function(...)
 #' @return The tail of the sequence \code{map(k, x)} beginning with the first
 #' element that satisfies the predicate f, or NULL if no element did.
 #'
+#' @seealso
+#' The functional-programming functions in base, especially \code{Filter},
+#' under \code{\link{funprog}}.
+#'
 #' @examples
 #' f <- 20:40
 #'
@@ -255,12 +296,19 @@ function(f, x, k=identity)
 #' of length m, return m sequences of length n. This sounds confusing but
 #' is quite intuitive in practice - see the examples.
 #'
+#' If not all sequences are the same length, shorter sequences are recycled
+#' to match the lengths of longer ones.
+#'
 #' For those familiar with Python, this is just like the built-in Python
 #' \code{zip} function.
 #'
 #' @param ... Sequences to zip.
 #'
 #' @return The zipped sequences.
+#'
+#' @seealso
+#' \code{link{for.each}} for application of an arbitrary function to zipped
+#' sequences of values.
 #'
 #' @examples
 #' f <- 1:5
@@ -279,20 +327,81 @@ function(...)
     return(do.call(curry(mapply, SIMPLIFY=FALSE), args))
 }
 
+#' Zipped function application
+#'
+#' \code{for.each} takes a function and a set of sequences (vectors, lists or
+#' pairlists), and applies the function successively to each set of elements
+#' that are in the sequences at the same positional index.
+#'
+#' This function combines \code{link{zip}} and \code{link{do.call}}, to apply
+#' a provided function successively to the elements of several sequences. The
+#' arity of the function must be compatible with the number of sequences
+#' passed as arguments; if not, an error will result.
+#'
+#' As in \code{\link{zip}}, if not all sequences are the same length, shorter
+#' sequences will be recycled to match the lengths of longer ones.
+#'
+#' @param f A function to apply.
+#' @param ... Vectors, lists or pairlists.
+#'
+#' @return The value of f on the last set of parameters supplied to it, or
+#' NULL if no or only zero-length sequences were supplied as arguments.
+#'
+#' @seealso
+#' \code{link{zip}} for the operation of zipping the parameter sequences.
+#'
+#' @examples
+#' f <- function(...) print(as.numeric(list(...)))
+#' invisible(for.each(f, 1:5, 6:10, 11:15))
+#'
 #' @export
 for.each <-
 function(f, ...)
 {
-    params <- zip(list(...))
+    params <- do.call(zip, list(...))
 
+    ret <- NULL
     for(p in params)
     {
-        do.call(f, p)
+        ret <- do.call(f, p)
     }
 
-    return(invisible(NULL))
+    return(ret)
 }
 
+#' Additional higher-order functions
+#'
+#' These functions are aliases for or thin wrappers around the functions in
+#' the base R \code{\link{funprog}} set. The aliases make the functions available
+#' under the names that are usual in Lisp/Scheme.
+#'
+#' The following functions are aliases for functions from base:
+#' \itemize{
+#' \item{\code{map} is base's \code{\link{Map}};}
+#' \item{\code{reduce} is base's \code{\link{Reduce}};}
+#' \item{\code{keep.matching} is base's \code{\link{Filter}};}
+#' }
+#'
+#' The \code{delete.matching} function does the opposite of
+#' \code{keep.matching} and returns only elements of x for which f does not
+#' return a logically true value.
+#'
+#' @param f A function of the appropriate arity, as in \code{\link{funprog}}.
+#' @param x A vector.
+#' @param ... As in \code{link{Map}}.
+#' @param init As in \code{link{Reduce}}.
+#' @param right As in \code{link{Reduce}}.
+#' @param accumulate As in \code{link{Reduce}}.
+#'
+#' @return \code{delete.matching} returns the elements of x for which f is not
+#' logically true.
+#'
+#' @seealso
+#' The functional-programming functions in base, especially \code{Filter},
+#' under \code{\link{funprog}}.
+#'
+#' @rdname funprog-extra
+#' @name funprog-extra
 #' @export
 delete.matching <-
 function(f, x)
@@ -300,20 +409,27 @@ function(f, x)
     return(Filter(Negate(f), x))
 }
 
+#' @rdname funprog-extra
 #' @export
-map <- Map
+map <-
+function(f, ...)
+{
+    return(do.call(curry(Map, f), list(...)))
+}
 
+#' @rdname funprog-extra
 #' @export
-reverse <- rev
+reduce <-
+function(f, x, init, right = FALSE, accumulate = FALSE)
+{
+    return(Reduce(f=f, x=x, init=init, right=right, accumulate=accumulate))
+}
 
+#' @rdname funprog-extra
 #' @export
-reduce <- Reduce
+keep.matching <-
+function(f, x)
+{
+    return(Filter(f=f, x=x))
+}
 
-#' @export
-keep.matching <- Filter
-
-#' @export
-keep.matching.items <- keep.matching
-
-#' @export
-delete.matching.items <- delete.matching

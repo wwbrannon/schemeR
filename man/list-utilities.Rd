@@ -7,9 +7,12 @@
 \alias{make.list}
 \alias{member}
 \alias{nth}
+\alias{reverse}
 \title{List utilities}
 \usage{
 cons(...)
+
+reverse(x)
 
 nth(obj, n)
 
@@ -22,12 +25,12 @@ make.list(n, expr)
 \arguments{
 \item{...}{Arguments that \code{cons} should pass to \code{c()}.}
 
+\item{x}{As in \code{\link{\%in\%}} or \code{\link{rev}}.}
+
 \item{obj}{An object that is.empty should check the length of.}
 
 \item{n}{The number of times \code{make.list} should replicate its expr
 argument in building a list.}
-
-\item{x}{As in \code{\link{\%in\%}}.}
 
 \item{table}{As in \code{\link{\%in\%}}.}
 
@@ -45,10 +48,10 @@ point of the alias is to make the function available under the standard
 Scheme name.
 }
 \details{
-\code{cons} is an alias for base R's \code{c}, \code{nth} is an alias for
-\code{[[}, \code{member} is an alias for \code{\%in\%}, and \code{is.empty}
-returns TRUE if and only if its argument is of length 0, returning FALSE
-otherwise.
+\code{cons} is an alias for base R's \code{\link{c}}, \code{nth} is an alias
+for \code{\link{[[}}, \code{member} is an alias for \code{\link{\%in\%}},
+\code{reverse} is an alias for \code{\link{rev}} and \code{is.empty} returns
+TRUE if and only if its argument is of length 0, returning FALSE otherwise.
 
 \code{make.list} returns a list constructed by replicating its expr argument
 n times. It is equivalent to \code{link{replicate}} with

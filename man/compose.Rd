@@ -38,4 +38,8 @@ h <- function(x) x^2
 
 compose(f, g, h)(2) #=> 13 == 3(2)^2 + 1
 }
+\seealso{
+\code{\link{curry}}, \code{\link{lazy.curry}} and \code{\link{uncurry}},
+which are frequently useful in conjunction with \code{compose}.
+}
 

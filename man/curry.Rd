@@ -63,4 +63,8 @@ paste0("foo", "bar") == "foobar"
 uncurry(curry(paste0, "baz"))("foo", "bar") == "foobar"
 
 }
+\seealso{
+\code{\link{compose}}, which is frequently useful in conjunction with the
+currying and uncurrying functions.
+}
 

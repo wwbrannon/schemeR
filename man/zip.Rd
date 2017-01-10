@@ -21,6 +21,9 @@ represent the transposition of the originals.
 of length m, return m sequences of length n. This sounds confusing but
 is quite intuitive in practice - see the examples.
 
+If not all sequences are the same length, shorter sequences are recycled
+to match the lengths of longer ones.
+
 For those familiar with Python, this is just like the built-in Python
 \code{zip} function.
 }
@@ -31,5 +34,9 @@ h <- 11:15
 
 zip(f, g, h)
 
+}
+\seealso{
+\code{link{for.each}} for application of an arbitrary function to zipped
+sequences of values.
 }
 

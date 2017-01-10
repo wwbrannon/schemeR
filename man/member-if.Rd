@@ -42,4 +42,8 @@ member.if(is.zero, f, k=function(x) x \%\% 3) == 21:40
 member.if.not(function(x) x < 30, f) == 30:40
 
 }
+\seealso{
+The functional-programming functions in base, especially \code{Filter},
+under \code{\link{funprog}}.
+}
 
