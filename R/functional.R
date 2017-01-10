@@ -2,8 +2,6 @@
 
 #FIXME: compose and curry should set srcref attributes so that they
 #pretty-print in a non-crazy way
-#FIXME: zip is producing warnings from mapply
-#FIXME: lambda is not returning functions correctly
 
 #' Compose functions
 #'
@@ -192,7 +190,7 @@ function(...)
         stop("Too few arguments to lambda")
 
     #This is easy; putting the formals together is harder
-    body <- do.call(expression, args[2:length(args)])
+    body <- as.call(c(list(as.symbol("{")), args[2:length(args)]))
 
     #In this case and a few others we don't want to
     #take the infix form of a .(...) as a call, so let's
