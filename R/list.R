@@ -1,16 +1,57 @@
 ## Type-generic list- or vector-processing functions
-#' @export
-cons <- c
 
+#' List utilities
+#'
+#' These functions provide small list- or vector-processing utilities, and in
+#' some cases are just aliases for functions in base R. In such cases, the
+#' point of the alias is to make the function available under the standard
+#' Scheme name.
+#'
+#' \code{cons} is an alias for base R's \code{c}, \code{nth} is an alias for
+#' \code{[[}, \code{member} is an alias for \code{\%in\%}, and \code{is.empty}
+#' returns TRUE if and only if its argument is of length 0, returning FALSE
+#' otherwise.
+#'
+#' \code{make.list} returns a list constructed by replicating its expr argument
+#' n times. It is equivalent to \code{link{replicate}} with
+#' \code{simplify=FALSE}.
+#'
+#' @param obj An object that is.empty should check the length of.
+#' @param n The number of times \code{make.list} should replicate its expr
+#' argument in building a list.
+#' @param expr An object which \code{make.list} should replicate in building
+#' a list.
+#'
+#' @return
+#' \code{make.list} returns the n-length list of replicated expr's. is.empty returns
+#' TRUE if its argument is 0-length and FALSE otherwise.
+#'
+#' @rdname list-utilities
+#' @name list-utilities
 #' @export
-nth <- `[`
+cons <-
+function(...)
+{
+    do.call(c, list(...))
+}
 
+#' @rdname list-utilities
+#' @export
+nth <-
+function(obj, n)
+{
+    obj[[n]]
+}
+
+#' @rdname list-utilities
 #' @export
 member <- `%in%`
 
+#' @rdname list-utilities
 #' @export
 is.empty <- function(obj) length(obj) == 0
 
+#' @rdname list-utilities
 #' @export
 make.list <-
 function(n, expr)
@@ -20,129 +61,189 @@ function(n, expr)
            simplify=FALSE)
 }
 
+#' List/vector access functions
+#'
+#' These functions are accessors for various elements and subsequences of lists
+#' and vectors. They are written in a type-generic way and will work for any
+#' broadly defined sequence type: vectors, lists (aka "generic vectors") and
+#' pairlists.
+#'
+#' Using "sequence" to mean list, other vector or pairlist, the basic functions
+#' here are
+#' \itemize{
+#' \item{car, which returns the first element of a sequence (car(x) is
+#' equivalent to x[[1]] for (pair)lists and to x[1] for vectors)}
+#' \item{cdr, which returns the sequence consisting of every element but
+#' the first, or NULL for a sequence of length 0 or length 1}
+#' \item{last, which returns the last element of a sequence}
+#' \item{first, which is an alias for car}
+#' }
+#'
+#' There are also a large number of functions of the form cXXXXr, where there
+#' are two, three or four "a"'s or "d"'s between the c and r. These functions
+#' are compositions of car and cdr: to give one example, \code{caadr(x)} is
+#' equivalent to car(car(cdr(x))). All such functions with up to four letters
+#' between the c and the r are pre-defined here.
+#'
+#' @param x The object whose elements or subsequences to access.
+#'
+#' @return A particular element or subsequence.
+#' @rdname list-access
+#' @name list-access
 #' @export
 car <-
-function(obj)
+function(x)
 {
-    if(is.list(obj) || is.pairlist(obj))
+    if(is.list(x) || is.pairlist(x))
     {
-        return(obj[[1]])
+        return(x[[1]])
     } else
     {
-        return(obj[1])
+        return(x[1])
     }
 }
 
+#' @rdname list-access
 #' @export
 cdr <-
-function(lst)
+function(x)
 {
     #Valid for both lists and vectors
-    ret <- lst[-1]
+    ret <- x[-1]
     if(length(ret) != 0)
         return(ret)
     else
         return(NULL)
 }
 
+#' @rdname list-access
 #' @export
 last <-
-function(obj)
+function(x)
 {
-    n <- length(obj)
+    n <- length(x)
 
-    if(is.list(obj) || is.pairlist(obj))
+    if(is.list(x) || is.pairlist(x))
     {
-        return(obj[[n]])
+        return(x[[n]])
     } else
     {
-        return(obj[n])
+        return(x[n])
     }
 }
 
+#' @rdname list-access
 #' @export
 first <- car
 
+#' @rdname list-access
 #' @export
-caar <- function(lst) { return(car(car(lst))) }
+caar <- compose(car, car)
 
+#' @rdname list-access
 #' @export
-cadr <- function(lst) { return(car(cdr(lst))) }
+cadr <- compose(car, cdr)
 
+#' @rdname list-access
 #' @export
-cdar <- function(lst) { return(cdr(car(lst))) }
+cdar <- compose(cdr, car)
 
+#' @rdname list-access
 #' @export
-cddr <- function(lst) { return(cdr(cdr(lst))) }
+cddr <- compose(cdr, cdr)
 
+#' @rdname list-access
 #' @export
-caaar <- function(lst) { return(car(car(car(lst)))) }
+caaar <- compose(car, car, car)
 
+#' @rdname list-access
 #' @export
-caadr <- function(lst) { return(car(car(cdr(lst)))) }
+caadr <- compose(car, car, cdr)
 
+#' @rdname list-access
 #' @export
-cadar <- function(lst) { return(car(cdr(car(lst)))) }
+cadar <- compose(car, cdr, car)
 
+#' @rdname list-access
 #' @export
-caddr <- function(lst) { return(car(cdr(cdr(lst)))) }
+caddr <- compose(car, cdr, cdr)
 
+#' @rdname list-access
 #' @export
-cdaar <- function(lst) { return(cdr(car(car(lst)))) }
+cdaar <- compose(cdr, car, car)
 
+#' @rdname list-access
 #' @export
-cdadr <- function(lst) { return(cdr(car(cdr(lst)))) }
+cdadr <- compose(cdr, car, cdr)
 
+#' @rdname list-access
 #' @export
-cddar <- function(lst) { return(cdr(cdr(car(lst)))) }
+cddar <- compose(cdr, cdr, car)
 
+#' @rdname list-access
 #' @export
-cdddr <- function(lst) { return(cdr(cdr(cdr(lst)))) }
+cdddr <- compose(cdr, cdr, cdr)
 
+#' @rdname list-access
 #' @export
-caaaar <- function(lst) { return(car(car(car(car(lst))))) }
+caaaar <- compose(car, car, car, car)
 
+#' @rdname list-access
 #' @export
-caaadr <- function(lst) { return(car(car(car(cdr(lst))))) }
+caaadr <- compose(car, car, car, cdr)
 
+#' @rdname list-access
 #' @export
-caadar <- function(lst) { return(car(car(cdr(car(lst))))) }
+caadar <- compose(car, car, cdr, car)
 
+#' @rdname list-access
 #' @export
-caaddr <- function(lst) { return(car(car(cdr(cdr(lst))))) }
+caaddr <- compose(car, car, cdr, cdr)
 
+#' @rdname list-access
 #' @export
-cadaar <- function(lst) { return(car(cdr(car(car(lst))))) }
+cadaar <- compose(car, cdr, car, car)
 
+#' @rdname list-access
 #' @export
-cadadr <- function(lst) { return(car(cdr(car(cdr(lst))))) }
+cadadr <- compose(car, cdr, car, cdr)
 
+#' @rdname list-access
 #' @export
-caddar <- function(lst) { return(car(cdr(cdr(car(lst))))) }
+caddar <- compose(car, cdr, cdr, car)
 
+#' @rdname list-access
 #' @export
-cadddr <- function(lst) { return(car(cdr(cdr(cdr(lst))))) }
+cadddr <- compose(car, cdr, cdr, cdr)
 
+#' @rdname list-access
 #' @export
-cdaaar <- function(lst) { return(cdr(car(car(car(lst))))) }
+cdaaar <- compose(cdr, car, car, car)
 
+#' @rdname list-access
 #' @export
-cdaadr <- function(lst) { return(cdr(car(car(cdr(lst))))) }
+cdaadr <- compose(cdr, car, car, cdr)
 
+#' @rdname list-access
 #' @export
-cdadar <- function(lst) { return(cdr(car(cdr(car(lst))))) }
+cdadar <- compose(cdr, car, cdr, car)
 
+#' @rdname list-access
 #' @export
-cdaddr <- function(lst) { return(cdr(car(cdr(cdr(lst))))) }
+cdaddr <- compose(cdr, car, cdr, cdr)
 
+#' @rdname list-access
 #' @export
-cddaar <- function(lst) { return(cdr(cdr(car(car(lst))))) }
+cddaar <- compose(cdr, cdr, car, car)
 
+#' @rdname list-access
 #' @export
-cddadr <- function(lst) { return(cdr(cdr(car(cdr(lst))))) }
+cddadr <- compose(cdr, cdr, car, cdr)
 
+#' @rdname list-access
 #' @export
-cdddar <- function(lst) { return(cdr(cdr(cdr(car(lst))))) }
+cdddar <- compose(cdr, cdr, cdr, car)
 
+#' @rdname list-access
 #' @export
-cddddr <- function(lst) { return(cdr(cdr(cdr(cdr(lst))))) }
+cddddr <- compose(cdr, cdr, cdr, cdr)
