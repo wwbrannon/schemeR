@@ -246,15 +246,38 @@ function(f, x, k=identity)
     return(member.if(Negate(f), x=x, k=k))
 }
 
+# FIXME I think?
+#' Transposition of sequences
+#'
+#' \code{zip} takes lists, vectors or pairlists and creates new ones that
+#' represent the transposition of the originals.
+#'
+#' "Transposition" here is meant in the following sense: given n sequences
+#' of length m, return m sequences of length n. This sounds confusing but
+#' is quite intuitive in practice - see the examples.
+#'
+#' For those familiar with Python, this is just like the built-in Python
+#' \code{zip} function.
+#'
+#' @param ... Sequences to zip.
+#'
+#' @return The zipped sequences.
+#'
+#' @examples
+#' f <- 1:5
+#' g <- 5:10
+#' h <- 11:15
+#'
+#' zip(f, g, h)
+#'
 #' @export
 zip <-
 function(...)
 {
     args <- list(function(...) { return(list(...)) })
     args <- c(args, list(...))
-    args$SIMPLIFY <- FALSE
 
-    return(do.call(mapply, args))
+    return(do.call(curry(mapply, SIMPLIFY, args)))
 }
 
 #' @export
