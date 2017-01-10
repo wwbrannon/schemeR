@@ -53,6 +53,41 @@ function(..., where=parent.frame())
     Reduce(helper, args)
 }
 
+#' Partial function application
+#'
+#' \code{curry} and related functions modify other functions by pre-setting
+#' their arguments.
+#'
+#' For an introduction to the whole concept of function currying and why it's
+#' useful, in more detail than we can give here, see the ever-helpful
+#' \href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}.
+#'
+#' \code{curry} uses standard evaluation (i.e., does not implicitly quote its
+#' arguments), while \code{lazy.curry} uses \code{substitute} to avoid
+#' evaluating its arguments before using them in currying.
+#'
+#' \code{uncurry} takes a curried function - one resulting from a call to
+#' \code{curry} or \code{lazy.curry} - and undoes the currying, returning the
+#' original function without pre-set arguments.
+#'
+#' If currying is nested, one call to \code{uncurry} can be made for each call
+#' to \code{curry} or \code{lazy.curry} - attempting to uncurry a function more
+#' times than it's been curried will raise an error.
+#'
+#' @param f The function to curry or uncurry.
+#' @param ... Arguments to be used in currying.
+#'
+#' @return For \code{curry} and \code{lazy.curry}, the curried function;
+#' for \code{uncurry}, the uncurried function. Note that \code{uncurry}
+#' will raise an error if its argument did not result from a call to
+#' \code{curry} or \code{lazy.curry}.
+#'
+#' @section Note:
+#' Currying is named after the mathematician
+#' \href{http://en.wikipedia.org/wiki/Haskell_Curry}{Haskell Curry}.
+#'
+#' @rdname curry
+#' @name curry
 #' @export
 curry <-
 function(f, ...)
@@ -65,6 +100,7 @@ function(f, ...)
     structure(func, .curried=TRUE) #we don't need to track how many times
 }
 
+#' @rdname curry
 #' @export
 lazy.curry <-
 function(f, ...)
@@ -75,9 +111,10 @@ function(f, ...)
     structure(func, .curried=TRUE)
 }
 
+#' @rdname curry
 #' @export
 uncurry <-
-function(f, ...)
+function(f)
 {
     if(is.null(attr(f, ".curried")))
         stop("f must have been returned by curry() or lazy.curry()")
