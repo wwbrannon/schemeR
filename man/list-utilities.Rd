@@ -20,10 +20,16 @@ is.empty(obj)
 make.list(n, expr)
 }
 \arguments{
+\item{...}{Arguments that \code{cons} should pass to \code{c()}.}
+
 \item{obj}{An object that is.empty should check the length of.}
 
 \item{n}{The number of times \code{make.list} should replicate its expr
 argument in building a list.}
+
+\item{x}{As in \code{\link{\%in\%}}.}
+
+\item{table}{As in \code{\link{\%in\%}}.}
 
 \item{expr}{An object which \code{make.list} should replicate in building
 a list.}

@@ -16,6 +16,9 @@
 #' n times. It is equivalent to \code{link{replicate}} with
 #' \code{simplify=FALSE}.
 #'
+#' @param ... Arguments that \code{cons} should pass to \code{c()}.
+#' @param x As in \code{\link{\%in\%}}.
+#' @param table As in \code{\link{\%in\%}}.
 #' @param obj An object that is.empty should check the length of.
 #' @param n The number of times \code{make.list} should replicate its expr
 #' argument in building a list.
