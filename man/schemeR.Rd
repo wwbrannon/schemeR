@@ -52,7 +52,7 @@ safely for arbitrary functions.
 }
 \examples{
 schemeR::schemeR({
-.(let, .(x, .(c, 1, 3, 5, 7, 9)),
+.(let, .(.(x, .(c, 1, 3, 5, 7, 9))),
   .(do, .(.(x, .(c, 1, 3, 5, 7, 9), .(cdr, x)),
           .(s, 0, .(`+`, s, .(car, x))),
           .(foo, 4)),
