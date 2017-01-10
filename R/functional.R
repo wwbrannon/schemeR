@@ -2,7 +2,7 @@
 
 #FIXME: compose and curry should set srcref attributes so that they
 #pretty-print in a non-crazy way
-#FIXME: we should implement real currying
+#FIXME: zip is producing warnings from mapply
 
 #' Compose functions
 #'
@@ -246,7 +246,6 @@ function(f, x, k=identity)
     return(member.if(Negate(f), x=x, k=k))
 }
 
-# FIXME I think?
 #' Transposition of sequences
 #'
 #' \code{zip} takes lists, vectors or pairlists and creates new ones that
@@ -277,7 +276,7 @@ function(...)
     args <- list(function(...) { return(list(...)) })
     args <- c(args, list(...))
 
-    return(do.call(curry(mapply, SIMPLIFY, args)))
+    return(do.call(curry(mapply, SIMPLIFY=FALSE), args))
 }
 
 #' @export
