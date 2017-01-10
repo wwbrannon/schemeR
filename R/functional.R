@@ -2,6 +2,7 @@
 
 #FIXME: compose and curry should set srcref attributes so that they
 #pretty-print in a non-crazy way
+#FIXME: we should implement real currying
 
 #' Compose functions
 #'
@@ -60,7 +61,9 @@ function(..., where=parent.frame())
 #'
 #' For an introduction to the whole concept of function currying and why it's
 #' useful, in more detail than we can give here, see the ever-helpful
-#' \href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}.
+#' \href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}. Strictly speaking,
+#' these functions do partial application rather than currying, but they can be
+#' used to implement currying easily and the difference is small in practice.
 #'
 #' \code{curry} uses standard evaluation (i.e., does not implicitly quote its
 #' arguments), while \code{lazy.curry} uses \code{substitute} to avoid
@@ -85,6 +88,17 @@ function(..., where=parent.frame())
 #' @section Note:
 #' Currying is named after the mathematician
 #' \href{http://en.wikipedia.org/wiki/Haskell_Curry}{Haskell Curry}.
+#'
+#' @examples
+#' #Equivalent
+#' f <- function(x) x + 6
+#' g <- curry(`+`, 6)
+#'
+#' 4 + 2 == 6
+#' curry(`+`, 2)(4) == 6
+#'
+#' paste0("foo", "bar") == "foobar"
+#' uncurry(curry(paste0, "baz"))("foo", "bar") == "foobar"
 #'
 #' @rdname curry
 #' @name curry
@@ -182,6 +196,35 @@ function(...)
     fn
 }
 
+#' Searching for tails of sequences
+#'
+#' \code{member.if} and \code{member.if.not} search "sequences" (by which we
+#' mean lists, other vectors or pairlists) for the first element satisfying
+#' some predicate function, and return the sub-sequence beginning with that
+#' element.
+#'
+#' The sequence searched is actually \code{\link{map}(k, x)} rather than x,
+#' which makes it easier to avoid defining short anonymous functions.
+#'
+#' @param f The filter predicate to use on the sequence x.
+#' @param x The sequence to search for a satisfying element.
+#' @param k The "key" function to pre-apply to elements of x. Defaults to
+#' the identity function.
+#'
+#' @return The tail of the sequence \code{map(k, x)} beginning with the first
+#' element that satisfies the predicate f, or NULL if no element did.
+#'
+#' @examples
+#' f <- 20:40
+#'
+#' #The first element divisible by 3 and all afterward
+#' member.if(is.zero, f, k=function(x) x %% 3) == 21:40
+#'
+#' #Trimming by the presence of a sentinel value
+#' member.if.not(function(x) x < 30, f) == 30:40
+#'
+#' @rdname member-if
+#' @name member-if
 #' @export
 member.if <-
 function(f, x, k=identity)
@@ -192,7 +235,15 @@ function(f, x, k=identity)
             return(x[i:length(x)])
     }
 
-    return(list())
+    return(NULL)
+}
+
+#' @rdname member-if
+#' @export
+member.if.not <-
+function(f, x, k=identity)
+{
+    return(member.if(Negate(f), x=x, k=k))
 }
 
 #' @export

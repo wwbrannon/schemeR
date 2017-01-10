@@ -30,7 +30,9 @@ their arguments.
 \details{
 For an introduction to the whole concept of function currying and why it's
 useful, in more detail than we can give here, see the ever-helpful
-\href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}.
+\href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}. Strictly speaking,
+these functions do partial application rather than currying, but they can be
+used to implement currying easily and the difference is small in practice.
 
 \code{curry} uses standard evaluation (i.e., does not implicitly quote its
 arguments), while \code{lazy.curry} uses \code{substitute} to avoid
@@ -48,5 +50,17 @@ times than it's been curried will raise an error.
 
 Currying is named after the mathematician
 \href{http://en.wikipedia.org/wiki/Haskell_Curry}{Haskell Curry}.
+}
+\examples{
+#Equivalent
+f <- function(x) x + 6
+g <- curry(`+`, 6)
+
+4 + 2 == 6
+curry(`+`, 2)(4) == 6
+
+paste0("foo", "bar") == "foobar"
+uncurry(curry(paste0, "baz"))("foo", "bar") == "foobar"
+
 }
 
