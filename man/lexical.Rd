@@ -73,12 +73,12 @@ schemeR::schemeR({
 .(letrec, .(.(i, 3), .(foo, 5)),
      .(`==`, i,
              .(`-`, foo, 2)))
- }, pkg=TRUE)
+ }, pkg=TRUE) == TRUE
 
 schemeR::schemeR({
 .(letrec, .(.(i, 3),
             .(foo, .(lambda, .(n), .(`+`, n, 1)))),
      .(`==`, i, .(foo, 2)))
- }, pkg=TRUE)
+ }, pkg=TRUE) == TRUE
 }
 

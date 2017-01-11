@@ -115,19 +115,18 @@ function(...)
     eval(body, envir=env)
 }
 
-#FIXME
 #' @examples
 #' schemeR::schemeR({
 #' .(letrec, .(.(i, 3), .(foo, 5)),
 #'      .(`==`, i,
 #'              .(`-`, foo, 2)))
-#'  }, pkg=TRUE)
+#'  }, pkg=TRUE) == TRUE
 #'
 #' schemeR::schemeR({
 #' .(letrec, .(.(i, 3),
 #'             .(foo, .(lambda, .(n), .(`+`, n, 1)))),
 #'      .(`==`, i, .(foo, 2)))
-#'  }, pkg=TRUE)
+#'  }, pkg=TRUE) == TRUE
 #' @rdname lexical
 #' @export
 letrec <-
@@ -142,9 +141,9 @@ function(...)
         if(length(b) != 2)
             stop("Invalid letrec binding")
 
-    #Break it out into bindings and body exps
+    #Break it out into bindings and body exps - implicit body progn is here
     bindings <- args[[1]]
-    body <- do.call(expression, args[2:length(args)]) #the implicit progn
+    body <- as.call(c(list(as.symbol("{")), args[2:length(args)]))
 
     #The bindings become the formals of the generated function, because
     #function formals can be defined in a mutually recursive way
