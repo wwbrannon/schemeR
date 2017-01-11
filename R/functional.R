@@ -2,6 +2,8 @@
 
 #FIXME: compose and curry should set srcref attributes so that they
 #pretty-print in a non-crazy way
+#FIXME: a composeM function for multiple-argument composition; thinking this
+#through before diving in will pay off
 
 #' Compose functions
 #'
