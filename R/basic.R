@@ -1,11 +1,9 @@
-#FIXME: remove the annoying auto-generated "Format" section from
-#basic-aliases.Rd before shipping to CRAN
-
 #' Lisp-friendly basic aliases
 #'
 #' These functions and other objects make things that are already available
 #' in base R available under their traditional names in Scheme and other Lisp
-#' dialects. See 'Details' for a full list.
+#' dialects., and in some cases provide syntactic names for R operators that
+#' would otherwise have to be backtick-quoted. See 'Details' for a full list.
 #'
 #' The aliases defined are:
 #' \itemize{
@@ -88,6 +86,7 @@ function(x)
     return(is.logical(x))
 }
 
+#' @format NULL
 #' @rdname basic-aliases
 #' @export
 nil <- NULL

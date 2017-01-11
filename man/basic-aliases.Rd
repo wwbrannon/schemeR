@@ -12,7 +12,6 @@
 \alias{nil}
 \alias{progn}
 \title{Lisp-friendly basic aliases}
-\format{An object of class \code{NULL} of length 0.}
 \usage{
 display(x, ...)
 
@@ -45,7 +44,8 @@ Return values are as for the aliased base functions.
 \description{
 These functions and other objects make things that are already available
 in base R available under their traditional names in Scheme and other Lisp
-dialects. See 'Details' for a full list.
+dialects., and in some cases provide syntactic names for R operators that
+would otherwise have to be backtick-quoted. See 'Details' for a full list.
 }
 \details{
 The aliases defined are:
