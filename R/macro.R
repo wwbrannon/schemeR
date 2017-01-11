@@ -1,6 +1,32 @@
-## A Lisp-like macro facility for R
-## This is the non-hygienic version of macros, based on defmacro() as in
-## Common Lisp, rather than on syntax objects and syntax-case.
+#' Lisp macros for R
+#'
+#' foo
+#'
+#' bar
+#' This is the non-hygienic version of macros, based on defmacro() as in
+#' Common Lisp, rather than on syntax objects and syntax-case.
+#'
+#' @param ... The infix form of prefix arguments.
+#'
+#' @return Macro returns the created macro, which is an R function. Defmacro,
+#' as in Common Lisp, returns the symbol it's bound the new macro to.
+#'
+#' @rdname macro
+#' @name macro
+#' @export
+defmacro <-
+function(...)
+{
+    TRUE #FIXME
+}
+
+#' @rdname macro
+#' @export
+macro <-
+function(...)
+{
+    TRUE #FIXME
+}
 
 #' Build a temporary symbol
 #'
