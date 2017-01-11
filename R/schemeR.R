@@ -21,8 +21,8 @@
 #' functional programming primitives (\code{lambda}, \code{zip},
 #' \code{for.each}, etc.) to list/vector manipulation (\code{car}, \code{cdr},
 #' \code{set.car}, etc.) to block-structure and lexical binding operators
-#' (\code{let}, \code{letrec}, \code{cond}, etc.). See \code{\link{functions}}
-#' for a full list and discussion.
+#' (\code{let}, \code{letrec}, \code{cond}, etc.). See the vignettes for a full
+#' list and discussion.
 #'
 #' @docType package
 #' @name schemeR-package
