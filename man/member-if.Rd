@@ -44,6 +44,6 @@ member.if.not(function(x) x < 30, f) == 30:40
 }
 \seealso{
 The functional-programming functions in base, especially \code{Filter},
-under \code{\link{funprog}}.
+under \code{\link[=Filter]{funprog}}.
 }
 

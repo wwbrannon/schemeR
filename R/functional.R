@@ -253,7 +253,7 @@ function(...)
 #'
 #' @seealso
 #' The functional-programming functions in base, especially \code{Filter},
-#' under \code{\link{funprog}}.
+#' under \code{\link[=Filter]{funprog}}.
 #'
 #' @examples
 #' f <- 20:40
@@ -372,8 +372,8 @@ function(f, ...)
 #' Additional higher-order functions
 #'
 #' These functions are aliases for or thin wrappers around the functions in
-#' the base R \code{\link{funprog}} set. The aliases make the functions available
-#' under the names that are usual in Lisp/Scheme.
+#' the base R \code{\link[=Filter]{funprog}} set. The aliases make the
+#' functions available under the names that are usual in Lisp/Scheme.
 #'
 #' The following functions are aliases for functions from base:
 #' \itemize{
@@ -386,7 +386,8 @@ function(f, ...)
 #' \code{keep.matching} and returns only elements of x for which f does not
 #' return a logically true value.
 #'
-#' @param f A function of the appropriate arity, as in \code{\link{funprog}}.
+#' @param f A function of the appropriate arity, as in
+#' \code{\link[=Filter]{funprog}}.
 #' @param x A vector.
 #' @param ... As in \code{link{Map}}.
 #' @param init As in \code{link{Reduce}}.
@@ -398,7 +399,7 @@ function(f, ...)
 #'
 #' @seealso
 #' The functional-programming functions in base, especially \code{Filter},
-#' under \code{\link{funprog}}.
+#' under \code{\link[=Filter]{funprog}}.
 #'
 #' @rdname funprog-extra
 #' @name funprog-extra

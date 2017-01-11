@@ -17,7 +17,8 @@ reduce(f, x, init, right = FALSE, accumulate = FALSE)
 keep.matching(f, x)
 }
 \arguments{
-\item{f}{A function of the appropriate arity, as in \code{\link{funprog}}.}
+\item{f}{A function of the appropriate arity, as in
+\code{\link[=Filter]{funprog}}.}
 
 \item{x}{A vector.}
 
@@ -35,8 +36,8 @@ logically true.
 }
 \description{
 These functions are aliases for or thin wrappers around the functions in
-the base R \code{\link{funprog}} set. The aliases make the functions available
-under the names that are usual in Lisp/Scheme.
+the base R \code{\link[=Filter]{funprog}} set. The aliases make the
+functions available under the names that are usual in Lisp/Scheme.
 }
 \details{
 The following functions are aliases for functions from base:
@@ -52,6 +53,6 @@ return a logically true value.
 }
 \seealso{
 The functional-programming functions in base, especially \code{Filter},
-under \code{\link{funprog}}.
+under \code{\link[=Filter]{funprog}}.
 }
 
