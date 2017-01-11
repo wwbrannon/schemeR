@@ -43,11 +43,6 @@ that's been expressed in prefix style, just generates the corresponding
 infix call. It's intended as a notational aid, so that entire scripts
 can be written in the prefix form.
 }
-\section{See Also}{
-
-\code{\link{prefixFiles}} and \code{\link{infixFiles}} for converting
-code found in files.
-}
 \examples{
 prefix(expression(x <- runif(10), y <- runif(10), cor(x, y)))
 

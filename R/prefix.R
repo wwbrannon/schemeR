@@ -16,10 +16,6 @@
 #' @return \code{prefix} and \code{infix} return the input expression
 #' converted to prefix or infix.
 #'
-#' @section See Also:
-#' \code{\link{prefixFiles}} and \code{\link{infixFiles}} for converting
-#' code found in files.
-#'
 #' @examples
 #' prefix(expression(x <- runif(10), y <- runif(10), cor(x, y)))
 #'
@@ -76,9 +72,80 @@ function(expr)
 infix <-
 function(expr)
 {
+    s1 <- infix_transform_dots(expr)
+    s2 <- infix_transform_quotes(s1)
+
+    return(s2)
+}
+
+# Stage 2 of prefix=>infix processing
+#
+# This function takes the output of stage 1 (infix_transform_dots), which has
+# had "." removed, and then handles a few additional pieces of syntactic
+# sugar: ".q" is transformed into a call to base R's quote(), and .b is
+# transformed into a call to our quasiquote(), which is like Scheme's
+# quasiquote in that it handles by comma (written ".c" here) and comma-at
+# (written ".s" for "splice"). The R() construction is again respected and
+# expressions so escaped are not modified. (R's bquote is not quite powerful
+# enough, so we had to roll our own quasiquote function.)
+#
+# @param expr The expression to process
+#
+# @return The transformed expression in infix syntax
+infix_transform_quotes <-
+function(expr)
+{
     if(is.expression(expr))
     {
-        lst <- lapply(as.list(expr), infix)
+        lst <- lapply(as.list(expr), infix_transform_quotes)
+        return(as.expression(lst))
+    } else if(is.call(expr))
+    {
+        #We still need to avoid modifying this in stage 2
+        if(expr[[1]] == as.symbol("R"))
+        {
+            if(length(expr) != 2)
+            {
+                stop("R() must have exactly one argument")
+            }
+
+            return(expr[[2]])
+        } else if(expr[[1]] == as.symbol(".q"))
+        {
+            lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
+            return(as.call(list(as.symbol("quote"), lst)))
+        } else if(expr[[1]] == as.symbol(".b"))
+        {
+            lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
+            return(as.call(list(as.symbol("quasiquote"), lst)))
+        } else
+        {
+            lst <- lapply(as.list(expr), infix_transform_quotes)
+            return(as.call(lst))
+        }
+    } else
+    {
+        return(expr)
+    }
+}
+
+# Stage 1 of prefix=>infix processing
+#
+# This function takes an expression in full Lisp-like prefix syntax and does
+# a few types of processing to bring it closer to the usual R infix syntax.
+# First, calls to "." are evaluated and expand to match.call()[-1], but any
+# occurrences of the R() construction are not modified.
+#
+# @param expr The expression to process
+#
+# @return The transformed expression in a form suitable for passing on to
+# infix_remove_quotes
+infix_transform_dots <-
+function(expr)
+{
+    if(is.expression(expr))
+    {
+        lst <- lapply(as.list(expr), infix_transform_dots)
         return(as.expression(lst))
     } else if(is.call(expr))
     {
@@ -102,7 +169,7 @@ function(expr)
             expr <- eval(expr, envir=env)
         }
 
-        lst <- lapply(as.list(expr), infix)
+        lst <- lapply(as.list(expr), infix_transform_dots)
         return(as.call(lst))
     } else
     {
@@ -134,140 +201,4 @@ function(expr)
 function(f, ...)
 {
     match.call()[-1]
-}
-
-# Convert an R expression object to a format suitable for writing to a file
-#
-# This function converts the sort of R object that results from a call to
-# infix() or prefix() to a character string in a format suitable for writing
-# to a file with cat(). The code written should be executable directly when
-# read back in from the file, rather than being wrapped in an expression
-# object.
-#
-# @param expr An R object.
-#
-# @return The string representation of expr.
-expr2char <-
-function(expr)
-{
-    #We don't want to handle expressions nested under calls: the idea here
-    #is to handle only the type of expressions that result from infix() and
-    #prefix()
-    if(is.expression(expr))
-    {
-        lst <- lapply(as.list(expr), expr2char)
-        return(paste0(lst, collapse="\n"))
-    } else
-    {
-        con <- textConnection(NULL, open="w")
-
-        dput(expr, file=con)
-        return(paste0(textConnectionValue(con), collapse="\n"))
-    }
-}
-
-# Convert one or more R code files from infix to prefix, or vice versa
-#
-# This function converts files from infix to prefix, or vice versa. It can
-# be told to overwrite the passed files, or to generate new files. In the
-# latter case, the input files are assumed to have extension ".R" for infix
-# code, and ".Rl" for prefix code. For a given input file, the corresponding
-# output file will have the other extension.
-#
-# @param files A character vector of file paths to convert.
-# @param direction Either "infix" or "prefix" - what should we generate?
-# @param overwrite Should the generated code overwrite the input file?
-#
-# @return Invisible NULL.
-fileconv <-
-function(files, direction, overwrite=FALSE)
-{
-    stopifnot(direction %in% c("prefix", "infix"))
-    fn <- get(direction)
-
-    if(is.null(overwrite) || !overwrite)
-    {
-        target_ext <- ifelse(direction == "prefix", "Rl", "R")
-        src_ext <- ifelse(direction == "prefix", "R", "Rl")
-
-        exts <- unique(vapply(files, tools::file_ext, character(1)))
-        if(length(exts) > 1 || exts[1] != src_ext)
-        {
-            stop(paste0("Files must have .", src_ext, " extension unless overwrite==TRUE"))
-        }
-    }
-
-    for(filename in files)
-    {
-        filename <- normalizePath(filename)
-
-        txt <- readChar(filename, file.info(filename)$size)
-        conv <- fn(parse(text=txt))
-
-        if(is.null(overwrite) || !overwrite)
-        {
-            ext <- tools::file_ext(filename)
-            nf <- paste0(substr(filename, 1, nchar(filename) - nchar(ext) - 1), ".")
-            nf <- paste0(nf, target_ext)
-        } else
-        {
-            nf <- filename
-        }
-
-        con <- file(nf, open="w+")
-        cat(expr2char(conv), file=con)
-
-        return(invisible(NULL))
-    }
-}
-
-#' Convert R code files from prefix to infix, or vice versa
-#'
-#' These functions convert files from prefix to infix, and vice versa.
-#' They can be told to overwrite the passed files, or to generate new files.
-#' In the latter case, when converting to infix, the input files are assumed
-#' to have extension ".Rl", and the corresponding output files will have
-#' extension ".R"; when converting to prefix, the input files are assumed
-#' to have extension ".R", and the corresponding output files will have
-#' extension ".Rl".
-#'
-#' @param files A character vector of file paths to convert.
-#' @param overwrite Should the generated code overwrite the input file?
-#'
-#' @return Invisible NULL.
-#'
-#' @section See Also:
-#' \code{\link{infix}} and \code{\link{prefix}} for converting expressions
-#' from R-style infix to Lisp-style prefix and vice versa; the \code{.}
-#' function, which is the building block of prefix-formatted R code.
-#'
-#' @examples
-#'
-#' \dontrun{
-#' prefixFiles(c("ex1.R", "ex2.R", "ex3.R"), overwrite=FALSE)
-#' prefixFiles(c("ex1.myext", "ex2.myext", "ex3.myext"), overwrite=TRUE)
-#' }
-#'
-#' @name fileconv
-#' @rdname fileconv
-#' @export
-prefixFiles <-
-function(files, overwrite=FALSE)
-{
-    fileconv(files=files, direction="prefix", overwrite=overwrite)
-}
-
-#' @examples
-#'
-#' \dontrun{
-#' infixFiles(c("ex1.Rl", "ex2.Rl", "ex3.Rl"), overwrite=FALSE)
-#' infixFiles(c("ex1.myext", "ex2.myext", "ex3.myext"), overwrite=TRUE)
-#' }
-#'
-#' @rdname fileconv
-#' @export
-infixFiles <-
-function(files, overwrite=FALSE)
-{
-    fileconv(files=files, direction="infix", overwrite=overwrite)
 }
