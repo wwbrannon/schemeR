@@ -109,3 +109,4 @@ function(expr, pkg=FALSE)
 
     eval(infix(expr), envir=envir, enclos=enclos)
 }
+

@@ -1,23 +1,49 @@
 #' Lisp macros for R
 #'
-#' foo
+#' These two functions create Lisp-style macros. \code{macro} creates and
+#' returns anonymous macros; defmacro is a convenience wrapper around
+#' \code{macro} which creates a macro and assigns it to a name in the current
+#' environment. A full discussion of macros and how to use them is beyond the
+#' scope of this page; see the vignettes for an R-focused introduction.
 #'
-#' bar
-#' This is the non-hygienic version of macros, based on defmacro() as in
-#' Common Lisp, rather than on syntax objects and syntax-case.
+#' This section assumes some familiarity with macros. For an introduction, see
+#' the package vignettes.
 #'
+#' FIXME
+#'
+#' Even though R is descended from Scheme, the macros implemented here are
+#' based on the ones used in Common Lisp. They're referred to as "non-hygienic"
+#' or defmacro-based, and contrast with the hygienic form that's traditional in
+#' Scheme and is based on syntax objects and the syntax-case special form.
+#'
+#' @param nm The symbol to which \code{defmacro} should bind the generated
+#' macro.
 #' @param ... The infix form of prefix arguments.
 #'
 #' @return Macro returns the created macro, which is an R function. Defmacro,
 #' as in Common Lisp, returns the symbol it's bound the new macro to.
 #'
+#' @seealso
+#' The \code{\link{gensym}} function, which generates temporary unique symbols
+#' that macro definitions can use to avoid capturing variables from the calling
+#' environment.
+#'
 #' @rdname macro
 #' @name macro
 #' @export
 defmacro <-
-function(...)
+function(nm, ...)
 {
-    TRUE #FIXME
+    args <- eval(substitute(alist(...)))
+
+    #FIXME make sure the args are invariant under 2+ applications of
+    #substitute
+    mac <- do.call(macro, args)
+    expr <- bquote(.(nm) <- .(mac))
+
+    eval(expr, envir=parent.frame())
+
+    return(nm)
 }
 
 #' @rdname macro
@@ -25,7 +51,51 @@ function(...)
 macro <-
 function(...)
 {
-    TRUE #FIXME
+    #Almost all of this for ~40 lines is exactly identical to lambda();
+    #the difference is in the type of function that's constructed and
+    #returned
+    args <- eval(substitute(alist(...)))
+
+    if(length(args) <= 1)
+        stop("Too few arguments to macro")
+
+    body <- as.call(c(list(as.symbol("{")), args[2:length(args)]))
+    bd <- bquote({
+        eval(.(body), envir=parent.frame())
+    })
+
+    #In this case and a few others we don't want to
+    #take the infix form of a .(...) as a call, so let's
+    #just turn it back into a list. This is a little gross,
+    #but there's no good way to do it.
+    params <- rapply(as.list(args[[1]]), as.list, how="replace")
+
+    vals <- list()
+    for(p in params)
+    {
+        if(!(length(p) %in% c(1,2)))
+            stop("Invalid lambda argument list")
+
+        nm <- as.character(p[[1]])
+        if(length(p) == 1)
+        {
+            #See the long comment block in lambda() for how this works
+            vals[[nm]] <- alist(x=)$x
+        } else
+        {
+            vals[[nm]] <- p[[2]] #don't eval
+        }
+    }
+
+    fn <- eval(call("function", as.pairlist(vals), bd), envir=parent.frame())
+
+    #Setting the environment here ensures that, as in lambda(), this function
+    #closes over variables in the environment where the macro was defined; free
+    #variables in body will, in other words, be resolved against the
+    #environment the body statements came from
+    environment(fn) <- parent.frame()
+
+    fn
 }
 
 #' Build a temporary symbol
@@ -45,6 +115,12 @@ function(...)
 #' @param len How long (in characters) the symbol should be.
 #'
 #' @return The generated symbol.
+#'
+#' @seealso
+#' The main use of this function is providing temporary symbols that macro
+#' definitions can use to avoid capturing variables from the calling
+#' environment; see \code{\link{macro}} and \code{link{defmacro}} for the macro
+#' facility in question.
 #'
 #' @export
 gensym <-

@@ -5,11 +5,14 @@
 \alias{macro}
 \title{Lisp macros for R}
 \usage{
-defmacro(...)
+defmacro(nm, ...)
 
 macro(...)
 }
 \arguments{
+\item{nm}{The symbol to which \code{defmacro} should bind the generated
+macro.}
+
 \item{...}{The infix form of prefix arguments.}
 }
 \value{
@@ -17,11 +20,26 @@ Macro returns the created macro, which is an R function. Defmacro,
 as in Common Lisp, returns the symbol it's bound the new macro to.
 }
 \description{
-foo
+These two functions create Lisp-style macros. \code{macro} creates and
+returns anonymous macros; defmacro is a convenience wrapper around
+\code{macro} which creates a macro and assigns it to a name in the current
+environment. A full discussion of macros and how to use them is beyond the
+scope of this page; see the vignettes for an R-focused introduction.
 }
 \details{
-bar
-This is the non-hygienic version of macros, based on defmacro() as in
-Common Lisp, rather than on syntax objects and syntax-case.
+This section assumes some familiarity with macros. For an introduction, see
+the package vignettes.
+
+FIXME
+
+Even though R is descended from Scheme, the macros implemented here are
+based on the ones used in Common Lisp. They're referred to as "non-hygienic"
+or defmacro-based, and contrast with the hygienic form that's traditional in
+Scheme and is based on syntax objects and the syntax-case special form.
+}
+\seealso{
+The \code{\link{gensym}} function, which generates temporary unique symbols
+that macro definitions can use to avoid capturing variables from the calling
+environment.
 }
 
