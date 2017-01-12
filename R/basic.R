@@ -122,16 +122,43 @@ nil <- NULL
 eq <-
 function(...)
 {
-    lst <- list(...)
-    if(length(lst) == 1 && !is.null(lst[[1]]))
-        return(TRUE)
+    lst <- rev(list(...))
 
-    ret <- Reduce(`==`, lst)
+    #Special cases
+    if(length(lst) == 0)
+        return(FALSE)
 
-    if(length(ret) > 0)
-        as.logical(ret)
-    else
-        FALSE
+    if(length(lst) == 1)
+    {
+        if(is.null(lst[[1]]))
+            return(FALSE)
+        else
+            return(TRUE)
+    }
+
+    #Sadly we can't use Reduce - the data types don't match
+    ret <- TRUE
+    for(i in seq_along(lst))
+    {
+        if(i == 1)
+        {
+            next
+        }
+
+        if(length(lst[[i]]) == 0 || length(lst[[i - 1]]) == 0)
+        {
+            ret <- FALSE
+            break
+        }
+
+        if(!(lst[[i]] == lst[[i - 1]]))
+        {
+            ret <- FALSE
+            break
+        }
+    }
+
+    ret
 }
 
 #' @rdname nonbinary-comparison
@@ -139,16 +166,43 @@ function(...)
 ge <-
 function(...)
 {
-    lst <- list(...)
-    if(length(lst) == 1 && !is.null(lst[[1]]))
-        return(TRUE)
+    lst <- rev(list(...))
 
-    ret <- Reduce(`>=`, lst)
+    #Special cases
+    if(length(lst) == 0)
+        return(FALSE)
 
-    if(length(ret) > 0)
-        as.logical(ret)
-    else
-        FALSE
+    if(length(lst) == 1)
+    {
+        if(is.null(lst[[1]]))
+            return(FALSE)
+        else
+            return(TRUE)
+    }
+
+    #Sadly we can't use Reduce - the data types don't match
+    ret <- TRUE
+    for(i in seq_along(lst))
+    {
+        if(i == 1)
+        {
+            next
+        }
+
+        if(length(lst[[i]]) == 0 || length(lst[[i - 1]]) == 0)
+        {
+            ret <- FALSE
+            break
+        }
+
+        if(!(lst[[i]] >= lst[[i - 1]]))
+        {
+            ret <- FALSE
+            break
+        }
+    }
+
+    ret
 }
 
 #' @rdname nonbinary-comparison
@@ -156,16 +210,43 @@ function(...)
 le <-
 function(...)
 {
-    lst <- list(...)
-    if(length(lst) == 1 && !is.null(lst[[1]]))
-        return(TRUE)
+    lst <- rev(list(...))
 
-    ret <- Reduce(`<=`, lst)
+    #Special cases
+    if(length(lst) == 0)
+        return(FALSE)
 
-    if(length(ret) > 0)
-        as.logical(ret)
-    else
-        FALSE
+    if(length(lst) == 1)
+    {
+        if(is.null(lst[[1]]))
+            return(FALSE)
+        else
+            return(TRUE)
+    }
+
+    #Sadly we can't use Reduce - the data types don't match
+    ret <- TRUE
+    for(i in seq_along(lst))
+    {
+        if(i == 1)
+        {
+            next
+        }
+
+        if(length(lst[[i]]) == 0 || length(lst[[i - 1]]) == 0)
+        {
+            ret <- FALSE
+            break
+        }
+
+        if(!(lst[[i]] <= lst[[i - 1]]))
+        {
+            ret <- FALSE
+            break
+        }
+    }
+
+    ret
 }
 
 #' @rdname nonbinary-comparison
@@ -173,16 +254,43 @@ function(...)
 gt <-
 function(...)
 {
-    lst <- list(...)
-    if(length(lst) == 1 && !is.null(lst[[1]]))
-        return(TRUE)
+    lst <- rev(list(...))
 
-    ret <- Reduce(`>`, lst)
+    #Special cases
+    if(length(lst) == 0)
+        return(FALSE)
 
-    if(length(ret) > 0)
-        as.logical(ret)
-    else
-        FALSE
+    if(length(lst) == 1)
+    {
+        if(is.null(lst[[1]]))
+            return(FALSE)
+        else
+            return(TRUE)
+    }
+
+    #Sadly we can't use Reduce - the data types don't match
+    ret <- TRUE
+    for(i in seq_along(lst))
+    {
+        if(i == 1)
+        {
+            next
+        }
+
+        if(length(lst[[i]]) == 0 || length(lst[[i - 1]]) == 0)
+        {
+            ret <- FALSE
+            break
+        }
+
+        if(!(lst[[i]] > lst[[i - 1]]))
+        {
+            ret <- FALSE
+            break
+        }
+    }
+
+    ret
 }
 
 #' @rdname nonbinary-comparison
@@ -190,14 +298,41 @@ function(...)
 lt <-
 function(...)
 {
-    lst <- list(...)
-    if(length(lst) == 1 && !is.null(lst[[1]]))
-        return(TRUE)
+    lst <- rev(list(...))
 
-    ret <- Reduce(`<`, lst)
+    #Special cases
+    if(length(lst) == 0)
+        return(FALSE)
 
-    if(length(ret) > 0)
-        as.logical(ret)
-    else
-        FALSE
+    if(length(lst) == 1)
+    {
+        if(is.null(lst[[1]]))
+            return(FALSE)
+        else
+            return(TRUE)
+    }
+
+    #Sadly we can't use Reduce - the data types don't match
+    ret <- TRUE
+    for(i in seq_along(lst))
+    {
+        if(i == 1)
+        {
+            next
+        }
+
+        if(length(lst[[i]]) == 0 || length(lst[[i - 1]]) == 0)
+        {
+            ret <- FALSE
+            break
+        }
+
+        if(!(lst[[i]] < lst[[i - 1]]))
+        {
+            ret <- FALSE
+            break
+        }
+    }
+
+    ret
 }
