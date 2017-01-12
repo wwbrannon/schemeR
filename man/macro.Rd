@@ -5,15 +5,18 @@
 \alias{macro}
 \title{Lisp macros for R}
 \usage{
-defmacro(nm, ...)
+defmacro(nm, params, ...)
 
-macro(...)
+macro(params, ...)
 }
 \arguments{
 \item{nm}{The symbol to which \code{defmacro} should bind the generated
 macro.}
 
-\item{...}{The infix form of prefix arguments.}
+\item{params}{A parameter list, which when coerced to pairlist is acceptable
+to the "function" constructor function.}
+
+\item{...}{Body statements.}
 }
 \value{
 \code{macro} returns the created macro, which is an R function.

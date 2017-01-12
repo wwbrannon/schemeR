@@ -13,7 +13,9 @@
 #'
 #' @param nm The symbol to which \code{defmacro} should bind the generated
 #' macro.
-#' @param ... The infix form of prefix arguments.
+#' @param params A parameter list, which when coerced to pairlist is acceptable
+#' to the "function" constructor function.
+#' @param ... Body statements.
 #'
 #' @return \code{macro} returns the created macro, which is an R function.
 #' \code{defmacro}, as in Common Lisp, returns the symbol it's bound the new
@@ -28,14 +30,15 @@
 #' @name macro
 #' @export
 defmacro <-
-function(nm, ...)
+function(nm, params, ...)
 {
     target <- as.symbol(deparse(substitute(nm)))
-    args <- eval(substitute(alist(...)))
+    body <- eval(substitute(alist(...)))
+    params <- substitute(params)
 
     #FIXME make sure the args are invariant under 2+ applications of
     #substitute
-    mac <- do.call(macro, args)
+    mac <- do.call(macro, c(list(params), args))
     expr <- bquote(.(target) <- .(mac))
 
     eval(expr, envir=parent.frame())
@@ -46,14 +49,11 @@ function(nm, ...)
 #' @rdname macro
 #' @export
 macro <-
-function(...)
+function(params, ...)
 {
-    #Almost all of this for ~40 lines is exactly identical to lambda();
-    #the difference is in the type of function that's constructed and
-    #returned
     args <- eval(substitute(alist(...)))
 
-    if(length(args) <= 1)
+    if(length(args) == 0)
         stop("Too few arguments to macro")
 
     body <- as.call(c(list(as.symbol("{")), args[2:length(args)]))
@@ -61,30 +61,7 @@ function(...)
         eval(.(body), envir=parent.frame())
     })
 
-    #In this case and a few others we don't want to
-    #take the infix form of a .(...) as a call, so let's
-    #just turn it back into a list. This is a little gross,
-    #but there's no good way to do it.
-    params <- rapply(as.list(args[[1]]), as.list, how="replace")
-
-    vals <- list()
-    for(p in params)
-    {
-        if(!(length(p) %in% c(1,2)))
-            stop("Invalid macro argument list")
-
-        nm <- as.character(p[[1]])
-        if(length(p) == 1)
-        {
-            #See the long comment block in lambda() for how this works
-            vals[[nm]] <- alist(x=)$x
-        } else
-        {
-            vals[[nm]] <- p[[2]] #don't eval
-        }
-    }
-
-    fn <- eval(call("function", as.pairlist(vals), bd), envir=parent.frame())
+    fn <- eval(call("function", as.pairlist(params), bd), envir=parent.frame())
 
     #Setting the environment here ensures that, as in lambda(), this function
     #closes over variables in the environment where the macro was defined; free
