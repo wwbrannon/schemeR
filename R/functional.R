@@ -9,7 +9,7 @@
 #'
 #' Function composition is a common operation in functional programming.
 #' Given some number of functions, this function returns another function
-#' which represents their composition: given three functions f, g, h,
+#' which represents their composition: for three functions f, g, h,
 #' compose(f, g, h) returns a function equivalent for all x to f(g(h(x))).
 #'
 #' The functions passed must all take a single argument.
@@ -64,12 +64,13 @@ function(..., where=parent.frame())
 #' \code{curry} and related functions modify other functions by pre-setting
 #' their arguments.
 #'
-#' For an introduction to the whole concept of function currying and why it's
-#' useful, in more detail than we can give here, see the ever-helpful
-#' \href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}. Strictly speaking,
-#' these functions do partial application rather than currying, but they can be
-#' used to implement currying easily and the difference is small in practice.
-#'
+#' Strictly speaking, these functions do partial application rather than
+#' currying, but they can be used to implement proper currying if desired, and
+#' the abuse of terminology is common. For an introduction to the whole concept
+#' of function currying and why it's useful, in more detail than we can give
+#' here, see the ever-helpful
+#' \href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}.
+
 #' \code{curry} uses standard evaluation (i.e., does not implicitly quote its
 #' arguments), while \code{lazy.curry} uses \code{substitute} to avoid
 #' evaluating its arguments before using them in currying.
