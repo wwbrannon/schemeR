@@ -1,7 +1,5 @@
 context("Assignment operators")
 
-#FIXME need type coercion tests for the set.* functions
-
 test_that("The define operator works", {
     define(a, 10)
     expect_equal(a, 10)
@@ -36,6 +34,10 @@ test_that("The set.pos operator works", {
     expect_equal(h, as.pairlist(as.list(c(1, 2, 10, 4:10))))
 
     f <- 1:10
+    set.pos(f, 4, "foo")
+    expect_true(is.character(f))
+
+    f <- 1:10
     expect_error(set.pos(f, -1, 10))
 })
 
@@ -51,6 +53,10 @@ test_that("The set.car operator works", {
     h <- as.pairlist(g)
     set.car(h, 10)
     expect_equal(h, as.pairlist(as.list(c(10, 2:10))))
+
+    f <- 1:10
+    set.car(f, "foo")
+    expect_true(is.character(f))
 })
 
 test_that("The set.cdr operator works", {
@@ -113,6 +119,10 @@ test_that("The set.cdr operator works", {
     f <- as.pairlist(as.list(1:10))
     f <- set.cdr(f, nil)
     expect_equal(f, as.pairlist(as.list(1)))
+
+    f <- 1:10
+    set.cdr(f, c("a", "b", "c"))
+    expect_true(is.character(f))
 
     f <- 1:10
     expect_error(set.cdr(f, as.numeric))
