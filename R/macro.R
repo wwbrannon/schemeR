@@ -6,22 +6,18 @@
 #' environment. A full discussion of macros and how to use them is beyond the
 #' scope of this page; see the vignettes for an R-focused introduction.
 #'
-#' This section assumes some familiarity with macros. For an introduction, see
-#' the package vignettes.
-#'
-#' FIXME
-#'
 #' Even though R is descended from Scheme, the macros implemented here are
-#' based on the ones used in Common Lisp. They're referred to as "non-hygienic"
-#' or defmacro-based, and contrast with the hygienic form that's traditional in
-#' Scheme and is based on syntax objects and the syntax-case special form.
+#' based on the "non-hygienic" ones used in Common Lisp. They contrast with
+#' the hygienic form that's traditional in Scheme, which is based on syntax
+#' objects and the syntax-case special form.
 #'
 #' @param nm The symbol to which \code{defmacro} should bind the generated
 #' macro.
 #' @param ... The infix form of prefix arguments.
 #'
-#' @return Macro returns the created macro, which is an R function. Defmacro,
-#' as in Common Lisp, returns the symbol it's bound the new macro to.
+#' @return \code{macro} returns the created macro, which is an R function.
+#' \code{defmacro}, as in Common Lisp, returns the symbol it's bound the new
+#' macro to.
 #'
 #' @seealso
 #' The \code{\link{gensym}} function, which generates temporary unique symbols
@@ -34,16 +30,17 @@
 defmacro <-
 function(nm, ...)
 {
+    target <- as.symbol(deparse(substitute(nm)))
     args <- eval(substitute(alist(...)))
 
     #FIXME make sure the args are invariant under 2+ applications of
     #substitute
     mac <- do.call(macro, args)
-    expr <- bquote(.(nm) <- .(mac))
+    expr <- bquote(.(target) <- .(mac))
 
     eval(expr, envir=parent.frame())
 
-    return(nm)
+    return(target)
 }
 
 #' @rdname macro
@@ -74,7 +71,7 @@ function(...)
     for(p in params)
     {
         if(!(length(p) %in% c(1,2)))
-            stop("Invalid lambda argument list")
+            stop("Invalid macro argument list")
 
         nm <- as.character(p[[1]])
         if(length(p) == 1)

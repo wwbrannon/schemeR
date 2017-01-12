@@ -16,8 +16,9 @@ macro.}
 \item{...}{The infix form of prefix arguments.}
 }
 \value{
-Macro returns the created macro, which is an R function. Defmacro,
-as in Common Lisp, returns the symbol it's bound the new macro to.
+\code{macro} returns the created macro, which is an R function.
+\code{defmacro}, as in Common Lisp, returns the symbol it's bound the new
+macro to.
 }
 \description{
 These two functions create Lisp-style macros. \code{macro} creates and
@@ -27,15 +28,10 @@ environment. A full discussion of macros and how to use them is beyond the
 scope of this page; see the vignettes for an R-focused introduction.
 }
 \details{
-This section assumes some familiarity with macros. For an introduction, see
-the package vignettes.
-
-FIXME
-
 Even though R is descended from Scheme, the macros implemented here are
-based on the ones used in Common Lisp. They're referred to as "non-hygienic"
-or defmacro-based, and contrast with the hygienic form that's traditional in
-Scheme and is based on syntax objects and the syntax-case special form.
+based on the "non-hygienic" ones used in Common Lisp. They contrast with
+the hygienic form that's traditional in Scheme, which is based on syntax
+objects and the syntax-case special form.
 }
 \seealso{
 The \code{\link{gensym}} function, which generates temporary unique symbols
