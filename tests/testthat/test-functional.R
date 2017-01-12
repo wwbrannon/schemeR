@@ -1,0 +1,3 @@
+context("Functional-programming operators")
+
+
