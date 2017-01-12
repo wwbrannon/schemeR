@@ -70,7 +70,7 @@ test_that("The set.cdr operator works", {
 
     f <- 1:10
     set.cdr(f, as.pairlist(as.list(1:3)))
-    expect_equal(f, as.pairlist(as.list(c(1, 1:3))))
+    expect_equal(f, list(1, 1, 2, 3))
 
     g <- as.list(1:10)
     set.cdr(g, 1:3)
@@ -82,7 +82,7 @@ test_that("The set.cdr operator works", {
 
     g <- as.list(1:10)
     set.cdr(g, as.pairlist(as.list(1:3)))
-    expect_equal(g, as.pairlist(as.list(c(10, 2:10))))
+    expect_equal(g, list(1,1,2,3))
 
     h <- as.pairlist(as.list(1:10))
     set.cdr(h, 1:3)
@@ -123,9 +123,4 @@ test_that("The set.cdr operator works", {
     f <- 1:10
     set.cdr(f, c("a", "b", "c"))
     expect_true(is.character(f))
-
-    f <- 1:10
-    expect_error(set.cdr(f, as.numeric))
-    expect_error(set.cdr(f, numeric(0)))
-    expect_error(set.cdr(f, list()))
 })

@@ -81,13 +81,14 @@ function(nm, val)
 {
     target <- as.symbol(deparse(substitute(nm)))
 
-    if(is.list(nm))
-    {
+    if(!is.pairlist(nm))
         expr <- bquote(.(target) <- c(.(target)[1], .(val)))
-    } else
-    {
-        expr <- bquote(.(target)[2:length( .(target) )] <- .(val))
-    }
+    else
+        expr <- bquote({
+            .(target) <- as.list(.(target))
+            .(target) <- c(.(target)[1], .(val))
+            .(target) <- as.pairlist(.(target))
+        })
 
     eval(expr, envir=parent.frame())
 }
