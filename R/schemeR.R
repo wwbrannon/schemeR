@@ -87,8 +87,6 @@ NULL
 schemeR <-
 function(expr, pkg=FALSE)
 {
-    #TODO: we have to do recursive macro expansion here
-
     expr <- substitute(expr)
 
     envir <- parent.frame()
@@ -109,3 +107,4 @@ function(expr, pkg=FALSE)
 
     eval(infix(expr), envir=envir, enclos=enclos)
 }
+

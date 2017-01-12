@@ -4,10 +4,13 @@
 \alias{lambda}
 \title{Construct an anonymous function in infix code}
 \usage{
-lambda(...)
+lambda(params, ...)
 }
 \arguments{
-\item{...}{The infix form of prefix arguments.}
+\item{params}{A parameter list, which when coerced to pairlist is acceptable
+to the "function" constructor function.}
+
+\item{...}{Body statements.}
 }
 \value{
 The constructed function.

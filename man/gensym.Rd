@@ -28,4 +28,10 @@ asking for length-1 unique symbols is unlikely to be useful), and ask for a
 particular string to be prepended for ease of processing or as even more
 insurance against name conflicts (perhaps relative to other environments).
 }
+\seealso{
+The main use of this function is providing temporary symbols that macro
+definitions can use to avoid capturing variables from the calling
+environment; see \code{\link{macro}} and \code{link{defmacro}} for the macro
+facility in question.
+}
 

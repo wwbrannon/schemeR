@@ -1,5 +1,3 @@
-## Various Lisp quote operators, some of which are provided already by R.
-
 ## Because normal Lisps have so much more permissive rules about what is and
 ## isn't a syntactic name, we can't use exactly the same names for quote,
 ## backquote, comma and comma-at. But it's extremely convenient to be able to
@@ -49,6 +47,13 @@
 #'
 #' @return The quoted expr, with partial evaluation and substitution done.
 #'
+#' @examples
+#' f <- list(1,2,3)
+#' eval(quasiquote(list(.c(f), 4, 5, 6)))
+#'
+#' f <- list(5,6,7)
+#' eval(quasiquote(list(1, 2, 3, 4, .s(f), 8, 9, 10)))
+#'
 #' @export
 quasiquote <-
 function(expr, where=parent.frame())
@@ -56,42 +61,45 @@ function(expr, where=parent.frame())
     expr <- substitute(expr)
 
     unquote <-
-        function(e)
+    function(e)
+    {
+        if (length(e) <= 1)
         {
-            if (length(e) <= 1)
-            {
-                return(e)
-            }
-            else if (e[[1]] == as.symbol(".c") || e[[1]] == as.symbol(".s"))
-            {
-                #.c and .s are both handled identically here, but see below
-                if(length(e) > 2)
-                    stop(paste0("Too many arguments to ", as.character(e[[1]])))
-
-                return(eval(e[[2]], envir=where))
-            }
-            else if(is.pairlist(e))
-            {
-                return(as.pairlist(lapply(e, unquote)))
-            } else
-            {
-                alt <- list()
-                ret <- lapply(e, unquote)
-
-                for(i in seq_along(e))
-                {
-                    if(length(e[[i]]) > 1 && e[[i]][[1]] == ".s")
-                    {
-                        alt <- c(alt, ret[[i]])
-                    } else
-                    {
-                        alt[[length(alt) + 1]] <- ret[[i]]
-                    }
-                }
-
-                return(as.call(alt))
-            }
+            return(e)
         }
+        else if (e[[1]] == as.symbol(".c") || e[[1]] == as.symbol(".s"))
+        {
+            #.c and .s are both handled identically here, but see below
+            if(length(e) > 2)
+                stop(paste0("Too many arguments to ", as.character(e[[1]])))
+
+            return(eval(e[[2]], envir=where))
+        }
+        else if(is.pairlist(e))
+        {
+            return(as.pairlist(lapply(e, unquote)))
+        } else
+        {
+            alt <- list()
+            ret <- lapply(e, unquote)
+
+            for(i in seq_along(e))
+            {
+                if(length(e[[i]]) > 1 && e[[i]][[1]] == ".s")
+                {
+                    alt <- c(alt, ret[[i]])
+                } else
+                {
+                    if(is.null(ret[[i]]))
+                        alt <- c(alt, list(ret[[i]]))
+                    else
+                        alt[[length(alt) + 1]] <- ret[[i]]
+                }
+            }
+
+            return(as.call(alt))
+        }
+    }
 
     unquote(expr)
 }

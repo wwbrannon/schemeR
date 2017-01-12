@@ -5,11 +5,60 @@
 #FIXME: a composeM function for multiple-argument composition; thinking this
 #through before diving in will pay off
 
+#' Construct an anonymous function in infix code
+#'
+#' This function provides the Lisp/Scheme lambda form for defining anonymous
+#' functions. Its behavior is very similar to R's "function" keyword, but it
+#' interprets its arguments in a way that allows it to be used naturally in
+#' prefix code. It is not intended to be called the usual way from infix R
+#' code.
+#'
+#' Because R is a Scheme dialect, this lambda is directly evaluable and
+#' evaluates to a function object. Common Lisp's sharp-quote operator is not
+#' necessary and not provided.
+#'
+#' @param params A parameter list, which when coerced to pairlist is acceptable
+#' to the "function" constructor function.
+#' @param ... Body statements.
+#'
+#' @return The constructed function.
+#'
+#' @examples
+#' schemeR::schemeR({
+#' .(map, .(lambda, .(n), .(paste0, n, "\n")),
+#'        .(list, "a", "b"))
+#' }, pkg=TRUE)
+#'
+#' schemeR::schemeR({
+#' .(letrec, .(.(i, 3),
+#'             .(foo, .(lambda, .(n), .(`+`, n, 1)))),
+#'      .(`==`, i, .(foo, 2)))
+#' }, pkg=TRUE)
+#'
+#' @export
+lambda <-
+function(params, ...)
+{
+    args <- eval(substitute(alist(...)))
+
+    if(length(args) == 0)
+        stop("Too few arguments to lambda")
+
+    #This is easy; putting the formals together is harder, but that's done
+    #in the infix() code
+    body <- as.call(c(list(as.symbol("{")), args))
+
+    fn <- eval(call("function", as.pairlist(params), body), envir=parent.frame())
+    environment(fn) <- parent.frame()
+
+    fn
+}
+
 #' Compose functions
 #'
 #' Function composition is a common operation in functional programming.
 #' Given some number of functions, this function returns another function
-#' which represents their composition: given three functions f, g, h,
+#' which represents their composition: for three functions f, g, h,
 #' compose(f, g, h) returns a function equivalent for all x to f(g(h(x))).
 #'
 #' The functions passed must all take a single argument.
@@ -64,12 +113,13 @@ function(..., where=parent.frame())
 #' \code{curry} and related functions modify other functions by pre-setting
 #' their arguments.
 #'
-#' For an introduction to the whole concept of function currying and why it's
-#' useful, in more detail than we can give here, see the ever-helpful
-#' \href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}. Strictly speaking,
-#' these functions do partial application rather than currying, but they can be
-#' used to implement currying easily and the difference is small in practice.
-#'
+#' Strictly speaking, these functions do partial application rather than
+#' currying, but they can be used to implement proper currying if desired, and
+#' the abuse of terminology is common. For an introduction to the whole concept
+#' of function currying and why it's useful, in more detail than we can give
+#' here, see the ever-helpful
+#' \href{https://en.wikipedia.org/wiki/Currying}{Wikipedia}.
+
 #' \code{curry} uses standard evaluation (i.e., does not implicitly quote its
 #' arguments), while \code{lazy.curry} uses \code{substitute} to avoid
 #' evaluating its arguments before using them in currying.
@@ -152,85 +202,6 @@ function(f)
     #just used the literal string "f", because it's fixed in the source code
     #of curry(), but that's confusing given the shadowed binding.)
     get(as.character(body(f)[[2]]), envir=environment(f), inherits=FALSE)
-}
-
-#' Construct an anonymous function in infix code
-#'
-#' This function provides the Lisp/Scheme lambda form for defining anonymous
-#' functions. Its behavior is very similar to R's "function" keyword, but it
-#' interprets its arguments in a way that allows it to be used naturally in
-#' prefix code. It is not intended to be called the usual way from infix R
-#' code.
-#'
-#' Because R is a Scheme dialect, this lambda is directly evaluable and
-#' evaluates to a function object. Common Lisp's sharp-quote operator is not
-#' necessary and not provided.
-#'
-#' @param ... The infix form of prefix arguments.
-#'
-#' @return The constructed function.
-#'
-#' @examples
-#' schemeR::schemeR({
-#' .(map, .(lambda, .(n), .(paste0, n, "\n")),
-#'        .(list, "a", "b"))
-#' }, pkg=TRUE)
-#'
-#' schemeR::schemeR({
-#' .(letrec, .(.(i, 3),
-#'             .(foo, .(lambda, .(n), .(`+`, n, 1)))),
-#'      .(`==`, i, .(foo, 2)))
-#' }, pkg=TRUE)
-#'
-#' @export
-lambda <-
-function(...)
-{
-    args <- eval(substitute(alist(...)))
-
-    if(length(args) <= 1)
-        stop("Too few arguments to lambda")
-
-    #This is easy; putting the formals together is harder
-    body <- as.call(c(list(as.symbol("{")), args[2:length(args)]))
-
-    #In this case and a few others we don't want to
-    #take the infix form of a .(...) as a call, so let's
-    #just turn it back into a list. This is a little gross,
-    #but there's no good way to do it.
-    params <- rapply(as.list(args[[1]]), as.list, how="replace")
-
-    vals <- list()
-    for(p in params)
-    {
-        if(!(length(p) %in% c(1,2)))
-            stop("Invalid lambda argument list")
-
-        nm <- as.character(p[[1]])
-        if(length(p) == 1)
-        {
-            #This one takes some explanation: in building a function by
-            #hand, the formal argument list is passed in to the "function"
-            #constructor as a pairlist, whose tags are used as the argument
-            #names. The values become the argument defaults. If you want an
-            #argument with no default, which will raise an error if missing,
-            #the value that has to be passed in is a zero-length symbol.
-            #There's no obvious way to generate one of these: as.symbol("") and
-            #related constructs all raise errors. But, as it turns out, alist()
-            #returns them for arguments that have a tag but no value. The fact
-            #that this little trick is possible saves us from having to write C
-            #to generate the necessary zero-length name.
-            vals[[nm]] <- alist(x=)$x
-        } else
-        {
-            vals[[nm]] <- p[[2]] #don't eval
-        }
-    }
-
-    fn <- eval(call("function", as.pairlist(vals), body), envir=parent.frame())
-    environment(fn) <- parent.frame()
-
-    fn
 }
 
 #' Searching for tails of sequences

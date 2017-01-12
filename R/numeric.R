@@ -52,14 +52,21 @@
 expt <-
 function(e1, e2)
 {
-    return(e1 ^ e2)
+    if(is.nil(e1) || is.nil(e2))
+        nil
+    else
+        e1 ^ e2
 }
+
 #' @rdname numeric
 #' @export
 quotient <-
 function(e1, e2)
 {
-    return(e1 %/% e2)
+    if(is.nil(e1) || is.nil(e2))
+        nil
+    else
+        e1 %/% e2
 }
 
 #' @rdname numeric
@@ -67,7 +74,10 @@ function(e1, e2)
 remainder <-
 function(e1, e2)
 {
-    return(e1 %% e2)
+    if(is.nil(e1) || is.nil(e2))
+        nil
+    else
+        e1 %% e2
 }
 
 #' @rdname numeric
@@ -87,7 +97,12 @@ function(x)
 is.even <-
 function(x)
 {
-    return(x %% 2 == 0)
+    if(length(x) == 0)
+        FALSE
+    else if(!is.numeric(x))
+        stop("x must be numeric")
+    else
+        x %% 2 == 0
 }
 
 #' @rdname numeric
@@ -95,7 +110,12 @@ function(x)
 is.odd <-
 function(x)
 {
-    return(x %% 2 == 1)
+    if(length(x) == 0)
+        FALSE
+    else if(!is.numeric(x))
+        stop("x must be numeric")
+    else
+        x %% 2 == 1
 }
 
 #' @rdname numeric
@@ -103,7 +123,12 @@ function(x)
 is.zero <-
 function(x)
 {
-    return(x == 0)
+    if(length(x) == 0)
+        FALSE
+    else if(!is.numeric(x))
+        stop("x must be numeric")
+    else
+        x == 0
 }
 
 #' @rdname numeric
@@ -111,7 +136,12 @@ function(x)
 is.positive <-
 function(x)
 {
-    return(x > 0)
+    if(length(x) == 0)
+        FALSE
+    else if(!is.numeric(x))
+        stop("x must be numeric")
+    else
+        x > 0
 }
 
 #' @rdname numeric
@@ -119,5 +149,10 @@ function(x)
 is.negative <-
 function(x)
 {
-    return(x < 0)
+    if(length(x) == 0)
+        FALSE
+    else if(!is.numeric(x))
+        stop("x must be numeric")
+    else
+        x < 0
 }

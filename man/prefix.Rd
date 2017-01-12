@@ -28,20 +28,27 @@ converted to prefix or infix.
 carried through.
 }
 \description{
-\code{prefix} and \code{infix} convert R code between the usual infix
-syntax and the Lisp-like prefix format written via the \code{.}
-function (see below). A call to \code{prefix()} does not evaluate the passed
+The \code{.} function allows writing an R function call in a Lisp-like
+prefix format, rather than the Algol-like infix format that R usually
+uses. \code{prefix} and \code{infix} convert R code between infix and
+prefix.
+}
+\details{
+When evaluated, a call to \code{.} doesn't actually execute the function
+that's been expressed in prefix style, just generates the corresponding
+infix call. It's intended as a notational aid, so that entire scripts
+can be written in the prefix form.
+
+A call to \code{prefix()} does not evaluate the passed
 or the generated expressions, partly for efficiency reasons; \code{infix()},
 though it still does not evaluate the generated expression, does do
 partial evaluation of the passed expression: each call to \code{.} is
 evaluated to the corresponding infix call.
 
-The \code{.} function allows writing an R function call in a Lisp-like prefix
-format, rather than the f(x, y, ...) infix format that R usually uses.
-When evaluated, a call to \code{.} doesn't actually execute the function
-that's been expressed in prefix style, just generates the corresponding
-infix call. It's intended as a notational aid, so that entire scripts
-can be written in the prefix form.
+\code{infix} and \code{prefix} are not quite inverses of each other, because
+\code{infix} understands certain pieces of infix syntactic sugar. Examples
+include the ".q" and ".b" quoting abbreviations, and the lambda lists passed
+to \code{lambda}, \code{macro} and \code{defmacro}.
 }
 \examples{
 prefix(expression(x <- runif(10), y <- runif(10), cor(x, y)))

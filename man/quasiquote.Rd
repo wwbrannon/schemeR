@@ -39,4 +39,12 @@ comma-at notation.}
 Splicing unquote via \code{.s()} works on a purely lexical basis, and unlike
 in Lisp, there is no guarantee the resulting object will make any sense.
 }
+\examples{
+f <- list(1,2,3)
+eval(quasiquote(list(.c(f), 4, 5, 6)))
+
+f <- list(5,6,7)
+eval(quasiquote(list(1, 2, 3, 4, .s(f), 8, 9, 10)))
+
+}
 

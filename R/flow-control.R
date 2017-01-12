@@ -8,6 +8,16 @@
 #' short-circuit evaluation. See the vignettes for full details and a more
 #' in-depth discussion of how to use these operators.
 #'
+#' @param val The value dispatched by case and compared with the first elements
+#' of the other clauses passed.
+#' @param bindings A list of variable bindings for do. Each element is itself
+#' two or three elements long; the first is a symbol, the second an initial
+#' value, and the third an expression evaluated to update the variable on each
+#' iteration. If no third element is provided, the variable is not updated.
+#' @param test The one- or two-element test expression for do. The first
+#' elment controls whether the loop continues; the second element, if provided,
+#' is the return value of the loop. If not provided, the first element's value
+#' is returned.
 #' @param ... The infix form of prefix arguments. Note that for \code{and()}
 #' and \code{or()}, each element of ... is just an arbitrary R expression.
 #'
@@ -89,15 +99,12 @@ function(...)
 #' @rdname flow-control
 #' @export
 case <-
-function(...)
+function(val, ...)
 {
     args <- eval(substitute(alist(...)))
-    if(length(args) <= 1)
-        stop("Too few arguments to case")
 
-    #The "key"
-    val <- eval(args[[1]])
-    args <- args[2:length(args)]
+    if(length(args) == 0)
+        stop("Too few arguments to case")
 
     for(i in seq_along(args))
     {
@@ -149,38 +156,30 @@ function(...)
 #'           .(s, 0, .(`+`, s, .(car, x))),
 #'           .(foo, 4)),
 #'     .(.(is.nil, x), s),
-#'     TRUE)) #=> 25
+#'     TRUE)) == 25
 #'  }, pkg=TRUE)
 #' @rdname flow-control
 #' @export
 do <-
-function(...)
+function(bindings, test, ...)
 {
+    bindings <- substitute(bindings)
+    test <- substitute(test)
     args <- eval(substitute(alist(...)))
 
-    if(length(args) <= 1)
-        stop("Too few arguments to do")
-
-    #The test-is-false loop body
-    if(length(args) >= 3)
-    {
-        cmd <- do.call(expression, args[3:length(args)])
-    } else
-    {
-        cmd <- quote(NULL)
-    }
-
     #The test clause
-    tc <- args[[2]]
-    if(length(tc) == 0)
+    if(length(test) == 0)
         stop("Invalid test clause for do")
 
-    test <- tc[[1]]
-    test_expr <- ifelse(length(tc) >= 2,
-                        do.call(expression, as.list(tc[2:length(tc)])),
-                        NULL)
+    #The test-is-false loop body, evaluated for effect
+    if(length(args) > 0)
+        cmd <- do.call(expression, args)
+    else
+        cmd <- quote(NULL)
 
-    args <- args[1:1]
+    test_expr <- ifelse(length(test) >= 2,
+                        do.call(expression, as.list(test[2:length(test)])),
+                        NULL)
 
     #The bindings and step expressions. If no step expression is given for
     #a variable "x", make "x" the step expression - it's a no-op that makes
@@ -188,8 +187,8 @@ function(...)
     lst <- list()
     steps <- list()
 
-    args <- rapply(as.list(args), as.list, how="replace")[[1]]
-    for(binding in args)
+    bindings <- as.list(bindings)
+    for(binding in bindings)
     {
         if(!(length(binding) %in% c(2,3)))
             stop("Invalid binding for do")
@@ -221,7 +220,7 @@ function(...)
     {
         #FIXME - several places in this file assume that parent.frame()
         #descends from baseenv()
-        ret <- eval(test, envir=lst, enclos=parent.frame())
+        ret <- eval(test[[1]], envir=lst, enclos=parent.frame())
         if(ret)
         {
             if(!is.null(test_expr))

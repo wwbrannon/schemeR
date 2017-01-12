@@ -13,15 +13,28 @@ or(...)
 
 and(...)
 
-case(...)
+case(val, ...)
 
 cond(...)
 
-do(...)
+do(bindings, test, ...)
 }
 \arguments{
 \item{...}{The infix form of prefix arguments. Note that for \code{and()}
 and \code{or()}, each element of ... is just an arbitrary R expression.}
+
+\item{val}{The value dispatched by case and compared with the first elements
+of the other clauses passed.}
+
+\item{bindings}{A list of variable bindings for do. Each element is itself
+two or three elements long; the first is a symbol, the second an initial
+value, and the third an expression evaluated to update the variable on each
+iteration. If no third element is provided, the variable is not updated.}
+
+\item{test}{The one- or two-element test expression for do. The first
+elment controls whether the loop continues; the second element, if provided,
+is the return value of the loop. If not provided, the first element's value
+is returned.}
 }
 \value{
 Return values are different for different operators.
@@ -73,7 +86,7 @@ schemeR::schemeR({
           .(s, 0, .(`+`, s, .(car, x))),
           .(foo, 4)),
     .(.(is.nil, x), s),
-    TRUE)) #=> 25
+    TRUE)) == 25
  }, pkg=TRUE)
 }
 

@@ -59,22 +59,19 @@ function(nm, pos, val)
 {
     target <- as.symbol(deparse(substitute(nm)))
 
-    if(is.list(nm))
-    {
-        expr <- bquote(.(target)[[.(pos)]] <- .(val))
-    } else
-    {
-        expr <- bquote(.(target)[.(pos)] <- .(val))
-    }
-
+    expr <- bquote(.(target)[[.(pos)]] <- .(val))
     eval(expr, envir=parent.frame())
 }
 
 #' @rdname assignment
 #' @export
-set.car <- function(nm, val)
+set.car <-
+function(nm, val)
 {
-    return(set.pos(nm=nm, val=val, pos=1))
+    target <- as.symbol(deparse(substitute(nm)))
+
+    expr <- bquote(set.pos(nm=.(target), val=.(val), pos=1))
+    eval(expr, envir=parent.frame())
 }
 
 #' @rdname assignment
@@ -84,13 +81,14 @@ function(nm, val)
 {
     target <- as.symbol(deparse(substitute(nm)))
 
-    if(is.list(nm))
-    {
+    if(!is.pairlist(nm))
         expr <- bquote(.(target) <- c(.(target)[1], .(val)))
-    } else
-    {
-        expr <- bquote(.(target)[2:length( .(target) )] <- .(val))
-    }
+    else
+        expr <- bquote({
+            .(target) <- as.list(.(target))
+            .(target) <- c(.(target)[1], .(val))
+            .(target) <- as.pairlist(.(target))
+        })
 
     eval(expr, envir=parent.frame())
 }

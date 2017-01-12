@@ -18,7 +18,7 @@ A function representing the composition of the arguments.
 \description{
 Function composition is a common operation in functional programming.
 Given some number of functions, this function returns another function
-which represents their composition: given three functions f, g, h,
+which represents their composition: for three functions f, g, h,
 compose(f, g, h) returns a function equivalent for all x to f(g(h(x))).
 }
 \details{
