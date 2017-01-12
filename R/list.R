@@ -105,13 +105,7 @@ function(n, expr)
 car <-
 function(x)
 {
-    if(is.list(x) || is.pairlist(x))
-    {
-        return(x[[1]])
-    } else
-    {
-        return(x[1])
-    }
+    return(x[[1]])
 }
 
 #' @rdname list-access
