@@ -1,5 +1,3 @@
-## Lexical binding
-
 #FIXME: better / more function-specific examples
 
 #' Lexical binding constructs
@@ -40,7 +38,10 @@
 #' in the usual infix form. Calling them "directly" - i.e., other than through
 #' prefix code and SchemeR() or infix() - is not recommended.
 #'
-#' @param ... The infix form of prefix arguments.
+#' @param bindings A list whose elements are themselves two element lists: the
+#' first element of each is a symbol, the second the value the symbol should be
+#' bound to in the environment for evaluating the body statements.
+#' @param ... Body statements.
 #'
 #' @return The result of evaluating the final body expression.
 #'
@@ -49,25 +50,24 @@
 #'.(let, .(.(i, 3),
 #'         .(foo, 5)),
 #'    .(`==`, i, .(`-`, foo, 2)))
-#'  }, pkg=TRUE)
+#'  }, pkg=TRUE) == TRUE
 #' @rdname lexical
 #' @name lexical
 #' @export
 let <-
-function(...)
+function(bindings, ...)
 {
+    bindings <- as.list(substitute(bindings))
     args <- eval(substitute(alist(...)))
 
-    if(length(args) <= 1)
+    if(length(args) == 0)
         stop("Too few arguments to let")
 
-    for(b in as.list(args[[1]]))
+    for(b in bindings)
         if(length(b) != 2)
             stop("Invalid let binding")
 
-    #Break it out into bindings and body exps
-    bindings <- args[[1]]
-    body <- do.call(expression, args[2:length(args)]) #the implicit progn
+    body <- do.call(expression, args) #the implicit progn
 
     #We need to evaluate all the inits before setting any of the variables;
     #this is not necessarily the same as evaluating them all with parent
@@ -83,28 +83,27 @@ function(...)
 #' .(let.star, .(.(i, 3), .(foo, 5)),
 #'       .(`==`, i,
 #'               .(`-`, foo, 2)))
-#'  }, pkg=TRUE)
+#'  }, pkg=TRUE) == TRUE
 #' @rdname lexical
 #' @export
 let.star <-
-function(...)
+function(bindings, ...)
 {
+    bindings <- as.list(substitute(bindings))
     args <- eval(substitute(alist(...)))
 
-    if(length(args) <= 1)
-        stop("Too few arguments to let.star")
+    if(length(args) == 0)
+        stop("Too few arguments to let")
 
-    for(b in as.list(args[[1]]))
+    for(b in bindings)
         if(length(b) != 2)
-            stop("Invalid let.star binding")
+            stop("Invalid let binding")
 
-    #Break it out into bindings and body exps
-    bindings <- args[[1]]
-    body <- do.call(expression, args[2:length(args)]) #the implicit progn
+    body <- do.call(expression, args) #the implicit progn
 
     #We need to "evaluate the bindings sequentially from left to right"
     env <- new.env(parent=parent.frame())
-    for(bind in as.list(bindings))
+    for(bind in bindings)
     {
         nm <- as.character(bind[[1]])
         val <- eval(bind[[2]], envir=env)
@@ -112,7 +111,7 @@ function(...)
         assign(nm, val, envir=env) #visible for subsequent evaluations
     }
 
-    eval(body, envir=env)
+    eval(body, envir=env, enclos=parent.frame())
 }
 
 #' @examples
@@ -130,20 +129,19 @@ function(...)
 #' @rdname lexical
 #' @export
 letrec <-
-function(...)
+function(bindings, ...)
 {
+    bindings <- as.list(substitute(bindings))
     args <- eval(substitute(alist(...)))
 
-    if(length(args) <= 1)
-        stop("Too few arguments to letrec")
+    if(length(args) == 0)
+        stop("Too few arguments to let")
 
-    for(b in as.list(args[[1]]))
+    for(b in bindings)
         if(length(b) != 2)
-            stop("Invalid letrec binding")
+            stop("Invalid let binding")
 
-    #Break it out into bindings and body exps - implicit body progn is here
-    bindings <- args[[1]]
-    body <- as.call(c(list(as.symbol("{")), args[2:length(args)]))
+    body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
 
     #The bindings become the formals of the generated function, because
     #function formals can be defined in a mutually recursive way

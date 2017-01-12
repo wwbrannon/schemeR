@@ -7,14 +7,18 @@
 \alias{lexical}
 \title{Lexical binding constructs}
 \usage{
-let(...)
+let(bindings, ...)
 
-let.star(...)
+let.star(bindings, ...)
 
-letrec(...)
+letrec(bindings, ...)
 }
 \arguments{
-\item{...}{The infix form of prefix arguments.}
+\item{bindings}{A list whose elements are themselves two element lists: the
+first element of each is a symbol, the second the value the symbol should be
+bound to in the environment for evaluating the body statements.}
+
+\item{...}{Body statements.}
 }
 \value{
 The result of evaluating the final body expression.
@@ -63,12 +67,12 @@ schemeR::schemeR({
 .(let, .(.(i, 3),
         .(foo, 5)),
    .(`==`, i, .(`-`, foo, 2)))
- }, pkg=TRUE)
+ }, pkg=TRUE) == TRUE
 schemeR::schemeR({
 .(let.star, .(.(i, 3), .(foo, 5)),
       .(`==`, i,
               .(`-`, foo, 2)))
- }, pkg=TRUE)
+ }, pkg=TRUE) == TRUE
 schemeR::schemeR({
 .(letrec, .(.(i, 3), .(foo, 5)),
      .(`==`, i,
