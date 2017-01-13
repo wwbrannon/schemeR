@@ -38,7 +38,7 @@ function(nm, params, ...)
 
     #FIXME make sure the args are invariant under 2+ applications of
     #substitute
-    mac <- do.call(macro, c(list(params), args))
+    mac <- do.call(macro, c(list(params), body))
     expr <- bquote(.(target) <- .(mac))
 
     eval(expr, envir=parent.frame())
