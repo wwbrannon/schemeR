@@ -129,6 +129,15 @@ function(str="G", envir=parent.frame(), len=10)
     return(as.symbol(paste0(str, nm)))
 }
 
+# Generate random character strings
+#
+# This function generates random character strings of a specified length.
+# It's intended as a helper for gensym() in generating unique temporary
+# symbols.
+#
+# @param len The length of the string to return.
+#
+# @return The generated character string
 gensym_candidate <-
 function(len)
 {
