@@ -56,7 +56,7 @@ function(params, ...)
     if(length(args) == 0)
         stop("Too few arguments to macro")
 
-    body <- as.call(c(list(as.symbol("{")), args[2:length(args)]))
+    body <- as.call(c(list(as.symbol("{")), args))
     bd <- bquote({
         eval(.(body), envir=parent.frame())
     })
