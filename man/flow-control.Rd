@@ -77,7 +77,7 @@ loop. If not provided, the first element's value is returned.
 The test expression for \code{when} and \code{unless} is a single
 expression, and is evaluated non-lazily. \code{when} executes its
 body expressions if the test expression is true; \code{unless}
-executes them if the test expression is false.
+executes them if the test expression is false or NULL.
 }
 \examples{
 # the print("foo") clause will never be reached in either expression
