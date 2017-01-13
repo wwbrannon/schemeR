@@ -90,7 +90,6 @@ function(params, ...)
 compose <-
 function(..., where=parent.frame())
 {
-    cl <- match.call()
     args <- list(...)
 
     resolv <- function(x) if(is.character(x))
@@ -204,12 +203,99 @@ function(f)
     get(as.character(body(f)[[2]]), envir=environment(f), inherits=FALSE)
 }
 
+#' Conjunction and disjunction
+#'
+#' \code{conjunct} and \code{disjunct} construct and return functions which
+#' represent the conjunction or disjunction of predicates.
+#'
+#' The functions passed must all take a single argument.
+#'
+#' If some of the \code{...} arguments are not function objects, they are
+#' resolved to function objects in the following way: character arguments
+#' are looked up in the provided \code{where} environment; symbol arguments
+#' are coerced to character and then looked up in the \code{where} environment;
+#' other types of arguments, or symbol/character arguments which fail to
+#' resolve to a function object, raise an error.
+#'
+#' @param ... Predicate functions whose conjunction or disjunction to return.
+#' @param where An environment in which to resolve any character or
+#' symbol arguments.
+#'
+#' @return A function of a single argument, representing the conjunction or
+#' disjunction of the predicates' values on its argument.
+#'
+#' @seealso
+#' \code{compose}, which returns the composition rather than the conjunction or
+#' disjunction.
+#'
+#' @examples
+#' f <- conjunct(is.positive, is.odd)
+#' g <- conjunct(is.positive, is.zero)
+#' h <- disjunct(is.negative, is.odd)
+#'
+#' f(3) == TRUE
+#' f(2) == FALSE
+#'
+#' #false for all x - no positive numbers are 0
+#' g(0) == FALSE
+#' g(10) == FALSE
+#'
+#' h(10) == FALSE
+#' h(-10) == TRUE
+#' h(3) == TRUE
+#'
+#' @rdname connectives
+#' @name connectives
+#' @export
+conjunct <-
+function(..., where=parent.frame())
+{
+    args <- list(...)
+
+    resolv <- function(x) if(is.character(x))
+        get(x, envir=where)
+    else if(is.symbol(x))
+        get(as.character(x), envir=where)
+    else
+        x
+    args <- lapply(args, resolv)
+
+    if(!all(vapply(args, is.function, logical(1))))
+        stop("Arguments must be or resolve to functions")
+
+    helper <- function(f, g) function(x) f(x) && g(x)
+    Reduce(helper, args)
+}
+
+#' @rdname connectives
+#' @export
+disjunct <-
+function(..., where=parent.frame())
+{
+    #FIXME factor all this out - macro?
+    args <- list(...)
+
+    resolv <- function(x) if(is.character(x))
+        get(x, envir=where)
+    else if(is.symbol(x))
+        get(as.character(x), envir=where)
+    else
+        x
+    args <- lapply(args, resolv)
+
+    if(!all(vapply(args, is.function, logical(1))))
+        stop("Arguments must be or resolve to functions")
+
+    helper <- function(f, g) function(x) f(x) || g(x)
+    Reduce(helper, args)
+}
+
 #' Searching for tails of sequences
 #'
 #' \code{member.if} and \code{member.if.not} search "sequences" (by which we
 #' mean lists, other vectors or pairlists) for the first element satisfying
 #' some predicate function, and return the sub-sequence beginning with that
-#' element.
+#' element. \code{member.if.not} uses Negate(f) as its predicate.
 #'
 #' The sequence searched is actually \code{\link{map}(k, x)} rather than x,
 #' which makes it easier to avoid defining short anonymous functions.
@@ -243,8 +329,13 @@ function(f, x, k=identity)
 {
     for(i in seq_along(x))
     {
-        if(f(k(x[[i]])))
-            return(x[i:length(x)])
+        if( compose(f, k)(x[[i]]) )
+        {
+            if(is.pairlist(x))
+                return(as.pairlist(x[i:length(x)]))
+            else
+                return(x[i:length(x)])
+        }
     }
 
     return(NULL)
@@ -255,7 +346,7 @@ function(f, x, k=identity)
 member.if.not <-
 function(f, x, k=identity)
 {
-    return(member.if(Negate(f), x=x, k=k))
+    return(member.if(f=do.call(Negate, list(f)), x=x, k=k))
 }
 
 #' Transposition of sequences
@@ -292,10 +383,18 @@ function(f, x, k=identity)
 zip <-
 function(...)
 {
-    args <- list(function(...) { return(list(...)) })
-    args <- c(args, list(...))
+    args <- list(...)
 
-    return(do.call(curry(mapply, SIMPLIFY=FALSE), args))
+    if(length(args) == 0)
+        return(list())
+
+    if(min(vapply(args, length, numeric(1))) == 0)
+        return(list())
+
+    lst <- list(function(...) { return(list(...)) })
+    lst <- c(lst, args)
+
+    return(do.call(curry(mapply, SIMPLIFY=FALSE), lst))
 }
 
 #' Zipped function application
@@ -383,25 +482,12 @@ function(f, x)
 
 #' @rdname funprog-extra
 #' @export
-map <-
-function(f, ...)
-{
-    return(do.call(curry(Map, f), list(...)))
-}
+reduce <- Reduce
 
 #' @rdname funprog-extra
 #' @export
-reduce <-
-function(f, x, init, right = FALSE, accumulate = FALSE)
-{
-    return(Reduce(f=f, x=x, init=init, right=right, accumulate=accumulate))
-}
+map <- Map
 
 #' @rdname funprog-extra
 #' @export
-keep.matching <-
-function(f, x)
-{
-    return(Filter(f=f, x=x))
-}
-
+keep.matching <- Filter

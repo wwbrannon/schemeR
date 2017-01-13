@@ -1,12 +1,21 @@
-## Flow-control operators
-
 #' Flow-control operators
 #'
 #' These functions provide R versions of several Scheme flow-control operators.
 #' \code{cond()} and \code{case()} are conditional forms, \code{do()} is an
 #' iteration construct, and \code{or()} and \code{and()} allow for conditional
-#' short-circuit evaluation. See the vignettes for full details and a more
-#' in-depth discussion of how to use these operators.
+#' short-circuit evaluation. \code{when} and \code{unless} execute expressions
+#' or not depending on the value of a test expression. See the vignettes for
+#' full details and a more in-depth discussion of how to use these operators.
+#'
+#' The test expression for \code{do} is either one or two elements, and is
+#' interpreted as follows: the first elment controls whether the loop
+#' continues; the second element, if provided, is the return value of the
+#' loop. If not provided, the first element's value is returned.
+#'
+#' The test expression for \code{when} and \code{unless} is a single
+#' expression, and is evaluated non-lazily. \code{when} executes its
+#' body expressions if the test expression is true; \code{unless}
+#' executes them if the test expression is false.
 #'
 #' @param val The value dispatched by case and compared with the first elements
 #' of the other clauses passed.
@@ -14,10 +23,7 @@
 #' two or three elements long; the first is a symbol, the second an initial
 #' value, and the third an expression evaluated to update the variable on each
 #' iteration. If no third element is provided, the variable is not updated.
-#' @param test The one- or two-element test expression for do. The first
-#' elment controls whether the loop continues; the second element, if provided,
-#' is the return value of the loop. If not provided, the first element's value
-#' is returned.
+#' @param test A test expression. See 'Details'.
 #' @param ... The infix form of prefix arguments. Note that for \code{and()}
 #' and \code{or()}, each element of ... is just an arbitrary R expression.
 #'
@@ -38,6 +44,8 @@
 #' expression on the first iteration on which the test expression is logically
 #' TRUE (if no second expression was provided, the value of the test expression
 #' is returned).}
+#' \item{when and unless return the value of the last body expression, if the
+#' body expressions were evaluated, or NULL.}
 #' }
 #'
 #' @examples
@@ -88,6 +96,34 @@ function(...)
     }
 
     return(ret)
+}
+
+#' @rdname flow-control
+#' @export
+when <-
+function(test, ...)
+{
+    args <- eval(substitute(alist(...)))
+    body <- as.call(c(list(as.symbol("{")), args))
+
+    if(!is.null(test) && test)
+        eval(body, envir=parent.frame())
+    else
+        NULL
+}
+
+#' @rdname flow-control
+#' @export
+unless <-
+function(test, ...)
+{
+    args <- eval(substitute(alist(...)))
+    body <- as.call(c(list(as.symbol("{")), args))
+
+    if(is.null(test) || !test)
+        eval(body, envir=parent.frame())
+    else
+        NULL
 }
 
 #' @examples
