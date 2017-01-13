@@ -67,7 +67,7 @@ function(bindings, ...)
         if(length(b) != 2)
             stop("Invalid let binding")
 
-    body <- do.call(expression, args) #the implicit progn
+    body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
 
     #We need to evaluate all the inits before setting any of the variables;
     #this is not necessarily the same as evaluating them all with parent
