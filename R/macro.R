@@ -110,17 +110,9 @@ function(str="G", envir=parent.frame(), len=10)
         stop("Prefix must have fewer than len characters")
 
     len <- len - nc
-
     lst <- as.list(envir)
 
-    flchars <- c(letters, LETTERS)
-    fl <- sample(flchars, 1)
-
-    chars <- c(letters, LETTERS, vapply(0:9, as.character, character(1)))
-    oc <- sample(chars, len - 1)
-
-    nm <- paste0(c(fl, oc), collapse="")
-
+    nm <- gensym_candidate(len)
     if(!is.null(lst))
     {
         repeat
@@ -130,9 +122,23 @@ function(str="G", envir=parent.frame(), len=10)
                 break
             }
 
-            nm <- paste0(sample(chars, len), collapse="")
+            nm <- gensym_candidate(len)
         }
     }
 
     return(as.symbol(paste0(str, nm)))
+}
+
+gensym_candidate <-
+function(len)
+{
+    flchars <- c(letters, LETTERS)
+    fl <- sample(flchars, 1)
+
+    chars <- c(letters, LETTERS, vapply(0:9, as.character, character(1)))
+    oc <- sample(chars, len - 1)
+
+    nm <- paste0(c(fl, oc), collapse="")
+
+    nm
 }
