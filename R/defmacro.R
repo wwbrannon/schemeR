@@ -54,12 +54,18 @@ function(params, ...)
     if(length(args) == 0)
         stop("Too few arguments to macro")
 
-    body <- as.call(c(list(as.symbol("{")), args))
-    bd <- bquote({
-        eval(.(body), envir=parent.frame())
-    })
+    #Put the body together; the hard part of doing this is
+    #the need for the macro to substitute all of its args
+    body <- list(as.symbol("{"))
+    for(p in names(params))
+        body <- c(body, bquote(.(as.symbol(p)) <- substitute(.(as.symbol(p)))))
 
-    fn <- eval(call("function", as.pairlist(params), bd), envir=parent.frame())
+    payload <- as.call(c(list(as.symbol("{")), args))
+    s <- bquote(eval(.(payload), envir=environment(), enclos=parent.frame()))
+    body <- c(body, s)
+
+    fn <- eval(call("function", as.pairlist(params), as.call(body)),
+               envir=parent.frame())
 
     #Setting the environment here ensures that, as in lambda(), this function
     #closes over variables in the environment where the macro was defined; free
