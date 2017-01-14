@@ -146,13 +146,13 @@ function(val, ...)
     {
         clause <- args[[i]]
 
-        if(length(clause) != 2)
+        if(!(length(clause) %in% c(2,3)))
             stop("Malformed case clause")
 
-        for(obj in eval(clause[[1]]))
+        for(obj in eval(clause[[length(clause) - 1]]))
         {
             if(isTRUE(all.equal(val, obj)))
-                return(eval(clause[[2]]))
+                return(eval(clause[[length(clause)]]))
         }
     }
 
