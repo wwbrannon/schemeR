@@ -142,6 +142,7 @@ function(val, ...)
     if(length(args) == 0)
         stop("Too few arguments to case")
 
+    #body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
     for(i in seq_along(args))
     {
         clause <- args[[i]]
@@ -175,6 +176,13 @@ function(...)
 
     for(clause in args)
     {
+        #Same hack as in the let constructs - see the comment block in let()
+        if(clause[[1]] == as.symbol("list") ||
+           clause[[1]] == as.symbol("pairlist"))
+        {
+            clause <- clause[2:length(clause)]
+        }
+
         if(eval(clause[[1]]))
         {
             body <- do.call(expression, as.list(clause[2:length(clause)]))
