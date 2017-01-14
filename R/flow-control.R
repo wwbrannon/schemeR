@@ -303,7 +303,10 @@ function(bindings, test, ...)
 
     #Evaluate the init expressions, but not (yet) the step expressions
     nms <- names(lst)
-    lst <- lapply(lst, eval)
+
+    e <- parent.frame()
+    lst <- lapply(lst, function(x) eval(x, envir=e))
+
     names(lst) <- nms
 
     #Begin iteration - each time around the loop, check test and decide
@@ -333,7 +336,10 @@ function(bindings, test, ...)
             #being sure to evaluate them in a context where the previous
             #values of the bindings are visible
             nms <- names(lst)
-            fn <- function(x) eval(x, envir=lst, enclos=parent.frame())
+
+            e <- parent.frame()
+            fn <- function(x) eval(x, envir=lst, enclos=e)
+
             lst <- lapply(steps, fn)
             names(lst) <- nms
         }
