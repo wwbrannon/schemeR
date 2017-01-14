@@ -229,11 +229,40 @@ function(...)
 do <-
 function(bindings, test, ...)
 {
-    bindings <- substitute(bindings)
+    bindings <- as.list(substitute(bindings))
     test <- substitute(test)
     args <- eval(substitute(alist(...)))
 
+    #Same hack as in the let constructs - see the comment block in let()
+    if(bindings[[1]] == as.symbol("list") ||
+       bindings[[1]] == as.symbol("pairlist"))
+    {
+        bindings <- bindings[2:length(bindings)]
+    }
+
+    for(b in bindings)
+    {
+        if(length(b) %in% c(2,3))
+            TRUE #pass
+        else if(length(b) == 4 && b[[1]] == as.symbol("list"))
+            TRUE #pass
+        else if(length(b) == 4 && b[[1]] == as.symbol("pairlist"))
+            TRUE #pass
+        else
+            stop("Invalid binding for do")
+    }
+
     #The test clause
+    if(length(test) == 0)
+        stop("Invalid test clause for do")
+
+    if(test[[1]] == as.symbol("list") ||
+       test[[1]] == as.symbol("pairlist"))
+    {
+        test <- test[2:length(test)]
+    }
+
+    #check both before and after possibly removing the (pair)list symbol
     if(length(test) == 0)
         stop("Invalid test clause for do")
 
@@ -243,21 +272,19 @@ function(bindings, test, ...)
     else
         cmd <- quote(NULL)
 
-    test_expr <- ifelse(length(test) >= 2,
-                        do.call(expression, as.list(test[2:length(test)])),
-                        NULL)
-
     #The bindings and step expressions. If no step expression is given for
     #a variable "x", make "x" the step expression - it's a no-op that makes
     #this function's logic slightly simpler.
     lst <- list()
     steps <- list()
 
-    bindings <- as.list(bindings)
     for(binding in bindings)
     {
-        if(!(length(binding) %in% c(2,3)))
-            stop("Invalid binding for do")
+        if(binding[[1]] == as.symbol("list") ||
+           binding[[1]] == as.symbol("pairlist"))
+        {
+            binding <- binding[2:length(binding)]
+        }
 
         nm <- as.character(binding[[1]])
         init <- binding[[2]]
@@ -287,23 +314,24 @@ function(bindings, test, ...)
         #FIXME - several places in this file assume that parent.frame()
         #descends from baseenv()
         ret <- eval(test[[1]], envir=lst, enclos=parent.frame())
-        if(ret)
+        if(ret) #end iteration
         {
-            if(!is.null(test_expr))
-            {
-                return(eval(test_expr, envir=lst, enclos=parent.frame()))
-            } else
+            if(length(test) == 1) #no separate return expression
             {
                 return(ret)
+            } else # >= 2
+            {
+                body <- c(list(as.symbol("{")), as.list(test[2:length(test)]))
+                return(eval(as.call(body), envir=lst, enclos=parent.frame()))
             }
         } else
         {
             #Evaluate this "for effect"
             eval(cmd, envir=lst, enclos=parent.frame())
 
-            #Update the step expressions, being sure to evaluate them
-            #in a context where the previous values of the bindings are
-            #visible
+            #Use the step expressions to update the variables (in lst),
+            #being sure to evaluate them in a context where the previous
+            #values of the bindings are visible
             nms <- names(lst)
             fn <- function(x) eval(x, envir=lst, enclos=parent.frame())
             lst <- lapply(steps, fn)
