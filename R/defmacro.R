@@ -81,17 +81,16 @@ function(params, ...)
 #' Build a temporary symbol
 #'
 #' \code{gensym} is an analogue of Common Lisp's gensym, for use in writing
-#' macros. It builds symbols which are guaranteed not to shadow or conflict
-#' with bindings already defined in an environment.
+#' macros. It builds randomly generated symbols which can be made to avoid
+#' shadowing bindings already defined in an environment.
 #'
 #' \code{gensym} provides some additional control over the form of the symbol
 #' it generates: the user can specify how long the symbol should be (though
 #' asking for length-1 unique symbols is unlikely to be useful), and ask for a
 #' particular string to be prepended for ease of processing or as even more
-#' insurance against name conflicts (perhaps relative to other environments).
+#' insurance against name conflicts.
 #'
 #' @param str A string to prepend to the generated symbol name.
-#' @param envir The environment the symbol should be unique in.
 #' @param len How long (in characters) the symbol should be.
 #'
 #' @return The generated symbol.
@@ -104,7 +103,7 @@ function(params, ...)
 #'
 #' @export
 gensym <-
-function(str="G", envir=parent.frame(), len=10)
+function(str="G", len=10)
 {
     nc <- nchar(str)
 
@@ -116,37 +115,7 @@ function(str="G", envir=parent.frame(), len=10)
         stop("Prefix must have fewer than len characters")
 
     len <- len - nc
-    lst <- as.list(envir)
 
-    nm <- gensym_candidate(len)
-    if(!is.null(lst))
-    {
-        repeat
-        {
-            if(!(nm %in% lst))
-            {
-                break
-            }
-
-            nm <- gensym_candidate(len)
-        }
-    }
-
-    return(as.symbol(paste0(str, nm)))
-}
-
-# Generate random character strings
-#
-# This function generates random character strings of a specified length.
-# It's intended as a helper for gensym() in generating unique temporary
-# symbols.
-#
-# @param len The length of the string to return.
-#
-# @return The generated character string
-gensym_candidate <-
-function(len)
-{
     flchars <- c(letters, LETTERS)
     fl <- sample(flchars, 1)
 
@@ -155,5 +124,5 @@ function(len)
 
     nm <- paste0(c(fl, oc), collapse="")
 
-    nm
+    return(as.symbol(paste0(str, nm)))
 }
