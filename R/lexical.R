@@ -63,8 +63,22 @@ function(bindings, ...)
     if(length(args) == 0)
         stop("Too few arguments to let")
 
+    #This is a hack to support calls to let which use in-line bindings lists
+    #constructed through explicit calls to list(), rather than using do.call
+    #to build the call from a previously defined list with quoted value
+    #expressions. In this case, we won't see a list of two elements, we'll
+    #see a parse tree and can't just evaluate the top level of it: we have
+    #to handle a first element in the bindings which is the symbol "list", and
+    #subsequent elements which are themselves three elements long:
+    #list(var, exp). Same in let.star and letrec below.
+    if(bindings[[1]] == as.symbol("list") ||
+       bindings[[1]] == as.symbol("pairlist"))
+    {
+        bindings <- bindings[2:length(bindings)]
+    }
+
     for(b in bindings)
-        if(length(b) != 2)
+        if(!(length(b) %in% c(2,3)))
             stop("Invalid let binding")
 
     body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
@@ -72,8 +86,9 @@ function(bindings, ...)
     #We need to evaluate all the inits before setting any of the variables;
     #this is not necessarily the same as evaluating them all with parent
     #parent.frame() rather than env, because they may have side effects.
-    vals <- lapply(bindings, function(x) eval(x[[2]], envir=parent.frame()))
-    names(vals) <- vapply(bindings, function(x) as.character(x[[1]]), character(1))
+    vals <- lapply(bindings, function(x) eval(x[[length(x)]], envir=parent.frame()))
+    names(vals) <- vapply(bindings, function(x) as.character(x[[length(x) - 1]]),
+                          character(1))
 
     eval(body, envir=vals, enclos=parent.frame())
 }
@@ -95,8 +110,14 @@ function(bindings, ...)
     if(length(args) == 0)
         stop("Too few arguments to let")
 
+    if(bindings[[1]] == as.symbol("list") ||
+       bindings[[1]] == as.symbol("pairlist"))
+    {
+        bindings <- bindings[2:length(bindings)]
+    }
+
     for(b in bindings)
-        if(length(b) != 2)
+        if(!(length(b) %in% c(2,3)))
             stop("Invalid let binding")
 
     body <- do.call(expression, args) #the implicit progn
@@ -105,8 +126,8 @@ function(bindings, ...)
     env <- new.env(parent=parent.frame())
     for(bind in bindings)
     {
-        nm <- as.character(bind[[1]])
-        val <- eval(bind[[2]], envir=env)
+        nm <- as.character(bind[[length(bind) - 1]])
+        val <- eval(bind[[length(bind)]], envir=env)
 
         assign(nm, val, envir=env) #visible for subsequent evaluations
     }
@@ -137,16 +158,23 @@ function(bindings, ...)
     if(length(args) == 0)
         stop("Too few arguments to let")
 
+    if(bindings[[1]] == as.symbol("list") ||
+       bindings[[1]] == as.symbol("pairlist"))
+    {
+        bindings <- bindings[2:length(bindings)]
+    }
+
     for(b in bindings)
-        if(length(b) != 2)
+        if(!(length(b) %in% c(2,3)))
             stop("Invalid let binding")
 
     body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
 
     #The bindings become the formals of the generated function, because
     #function formals can be defined in a mutually recursive way
-    vals <- lapply(bindings, function(x) x[[2]])
-    names(vals) <- vapply(bindings, function(x) as.character(x[[1]]), character(1))
+    vals <- lapply(bindings, function(x) x[[length(x)]])
+    names(vals) <- vapply(bindings, function(x) as.character(x[[length(x) - 1]]),
+                          character(1))
 
     fn <- eval(call("function", as.pairlist(vals), body), envir=parent.frame())
     environment(fn) <- parent.frame()
