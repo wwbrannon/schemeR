@@ -165,7 +165,8 @@ function(val, ...)
             if(isTRUE(all.equal(val, obj)))
             {
                 #the implicit progn
-                body <- c(list(as.symbol("{")), clause[2:length(clause)])
+                body <- c(list(as.symbol("{")),
+                          as.list(clause[2:length(clause)]))
                 return(eval(as.call(body)))
             }
         }
@@ -206,7 +207,7 @@ function(...)
 
         if(eval(clause[[1]]))
         {
-            body <- c(list(as.symbol("{")), clause[2:length(clause)])
+            body <- c(list(as.symbol("{")), as.list(clause[2:length(clause)]))
             return(eval(as.call(body)))
         }
     }
