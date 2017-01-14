@@ -142,18 +142,32 @@ function(val, ...)
     if(length(args) == 0)
         stop("Too few arguments to case")
 
-    #body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
     for(i in seq_along(args))
     {
         clause <- args[[i]]
 
-        if(!(length(clause) %in% c(2,3)))
+        if(length(clause) <= 1)
             stop("Malformed case clause")
 
-        for(obj in eval(clause[[length(clause) - 1]]))
+        #Same hack as in the let constructs - see the comment block in let()
+        if(clause[[1]] == as.symbol("list") ||
+           clause[[1]] == as.symbol("pairlist"))
+        {
+            clause <- clause[2:length(clause)]
+        }
+
+        #check both before and after possibly removing the (pair)list symbol
+        if(length(clause) <= 1)
+            stop("Malformed case clause")
+
+        for(obj in eval(clause[[1]]))
         {
             if(isTRUE(all.equal(val, obj)))
-                return(eval(clause[[length(clause)]]))
+            {
+                #the implicit progn
+                body <- c(list(as.symbol("{")), clause[2:length(clause)])
+                return(eval(as.call(body)))
+            }
         }
     }
 
@@ -176,6 +190,9 @@ function(...)
 
     for(clause in args)
     {
+        if(length(clause) <= 1)
+            stop("Malformed cond clause")
+
         #Same hack as in the let constructs - see the comment block in let()
         if(clause[[1]] == as.symbol("list") ||
            clause[[1]] == as.symbol("pairlist"))
@@ -183,10 +200,14 @@ function(...)
             clause <- clause[2:length(clause)]
         }
 
+        #check both before and after possibly removing the (pair)list symbol
+        if(length(clause) <= 1)
+            stop("Malformed cond clause")
+
         if(eval(clause[[1]]))
         {
-            body <- do.call(expression, as.list(clause[2:length(clause)]))
-            return(eval(body))
+            body <- c(list(as.symbol("{")), clause[2:length(clause)])
+            return(eval(as.call(body)))
         }
     }
 
