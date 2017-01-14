@@ -10,7 +10,7 @@
 # A prefix version
 schemeR::schemeR({
     .(defmacro, lcomp, .(exp, s1, var, s2, lst, conditional, test),
-        .(let, .(.(result, .(gensym)), .(lvar, .(gensym))),
+        .(let, .(.(result, .(gensym, "G1")), .(lvar, .(gensym, "G2"))),
             .b(.(let, .(.(.c(lvar), .c(lst))),
                     .(do, .(.(.c(result), nil, .(append, .c(result), .c(exp))),
                             .(.c(var), car(.c(lvar)), car(.c(lvar)))),
@@ -22,7 +22,7 @@ schemeR::schemeR({
 zls <- alist(x=)$x
 defmacro(lcomp, alist(exp=zls, s1=zls, var=zls, s2=zls, lst=zls,
                       conditional=zls, test=zls),
-    let(list(list(result, gensym()), list(lvar, gensym())),
+    let(list(list(result, gensym("G1")), list(lvar, gensym("G2"))),
         quasiquote({
             let(list(list(.c(lvar), .c(lst))),
                 do(list(
