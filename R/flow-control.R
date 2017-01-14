@@ -302,12 +302,9 @@ function(bindings, test, ...)
     }
 
     #Evaluate the init expressions, but not (yet) the step expressions
-    nms <- names(lst)
-
-    e <- parent.frame()
-    lst <- lapply(lst, function(x) eval(x, envir=e))
-
-    names(lst) <- nms
+    e <- new.env(parent=parent.frame())
+    for(i in seq_along(lst))
+        assign(names(lst)[[i]], eval(lst[[i]], envir=parent.frame()), envir=e)
 
     #Begin iteration - each time around the loop, check test and decide
     #what to do. If needed, eval the step expressions in an environment
@@ -316,7 +313,7 @@ function(bindings, test, ...)
     {
         #FIXME - several places in this file assume that parent.frame()
         #descends from baseenv()
-        ret <- eval(test[[1]], envir=lst, enclos=parent.frame())
+        ret <- eval(test[[1]], envir=e)
         if(ret) #end iteration
         {
             if(length(test) == 1) #no separate return expression
@@ -325,23 +322,18 @@ function(bindings, test, ...)
             } else # >= 2
             {
                 body <- c(list(as.symbol("{")), as.list(test[2:length(test)]))
-                return(eval(as.call(body), envir=lst, enclos=parent.frame()))
+                return(eval(as.call(body), envir=e))
             }
         } else
         {
             #Evaluate this "for effect"
-            eval(cmd, envir=lst, enclos=parent.frame())
+            eval(cmd, envir=e)
 
             #Use the step expressions to update the variables (in lst),
             #being sure to evaluate them in a context where the previous
             #values of the bindings are visible
-            nms <- names(lst)
-
-            e <- parent.frame()
-            fn <- function(x) eval(x, envir=lst, enclos=e)
-
-            lst <- lapply(steps, fn)
-            names(lst) <- nms
+            for(i in seq_along(steps))
+                assign(names(lst)[[i]], eval(steps[[i]], envir=e), envir=e)
         }
     }
 }
