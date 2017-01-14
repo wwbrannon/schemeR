@@ -49,6 +49,7 @@ function(nm, params, ...)
 macro <-
 function(params, ...)
 {
+    #FIXME? should this substitute params too?
     args <- eval(substitute(alist(...)))
 
     if(length(args) == 0)
@@ -64,6 +65,7 @@ function(params, ...)
     s <- bquote(eval(.(payload), envir=environment(), enclos=parent.frame()))
     body <- c(body, s)
 
+    #Finally, roll it all together
     fn <- eval(call("function", as.pairlist(params), as.call(body)),
                envir=parent.frame())
 
