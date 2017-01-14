@@ -78,8 +78,16 @@ function(bindings, ...)
     }
 
     for(b in bindings)
-        if(!(length(b) %in% c(2,3)))
+    {
+        if(length(b) == 2)
+            TRUE #pass
+        else if(length(b) == 3 && b[[1]] == as.symbol("list"))
+            TRUE #pass
+        else if(length(b) == 3 && b[[1]] == as.symbol("pairlist"))
+            TRUE #pass
+        else
             stop("Invalid let binding")
+    }
 
     body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
 
@@ -117,8 +125,16 @@ function(bindings, ...)
     }
 
     for(b in bindings)
-        if(!(length(b) %in% c(2,3)))
+    {
+        if(length(b) == 2)
+            TRUE #pass
+        else if(length(b) == 3 && b[[1]] == as.symbol("list"))
+            TRUE #pass
+        else if(length(b) == 3 && b[[1]] == as.symbol("pairlist"))
+            TRUE #pass
+        else
             stop("Invalid let binding")
+    }
 
     body <- do.call(expression, args) #the implicit progn
 
@@ -165,8 +181,16 @@ function(bindings, ...)
     }
 
     for(b in bindings)
-        if(!(length(b) %in% c(2,3)))
+    {
+        if(length(b) == 2)
+            TRUE #pass
+        else if(length(b) == 3 && b[[1]] == as.symbol("list"))
+            TRUE #pass
+        else if(length(b) == 3 && b[[1]] == as.symbol("pairlist"))
+            TRUE #pass
+        else
             stop("Invalid let binding")
+    }
 
     body <- as.call(c(list(as.symbol("{")), args)) #the implicit progn
 
