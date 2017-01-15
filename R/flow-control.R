@@ -68,7 +68,8 @@ function(...)
     for(arg in args)
     {
         #only evaluate once in case there are side effects
-        ret <- eval(arg)
+        e <- parent.frame()
+        ret <- eval(arg, envir=e)
 
         if(!identical(as.logical(ret), FALSE))
             break
@@ -89,7 +90,8 @@ function(...)
     for(arg in args)
     {
         #only evaluate once in case there are side effects
-        ret <- eval(arg)
+        e <- parent.frame()
+        ret <- eval(arg, envir=e)
 
         if(identical(as.logical(ret), FALSE))
             break
@@ -107,9 +109,14 @@ function(test, ...)
     body <- as.call(c(list(as.symbol("{")), args))
 
     if(!is.null(test) && test)
-        eval(body, envir=parent.frame())
+    {
+        e <- parent.frame()
+        eval(body, envir=e)
+    }
     else
+    {
         NULL
+    }
 }
 
 #' @rdname flow-control
@@ -121,9 +128,14 @@ function(test, ...)
     body <- as.call(c(list(as.symbol("{")), args))
 
     if(is.null(test) || !test)
-        eval(body, envir=parent.frame())
+    {
+        e <- parent.frame()
+        eval(body, envir=e)
+    }
     else
+    {
         NULL
+    }
 }
 
 #' @examples
@@ -160,14 +172,15 @@ function(val, ...)
         if(length(clause) <= 1)
             stop("Malformed case clause")
 
-        for(obj in eval(clause[[1]]))
+        e <- parent.frame()
+        for(obj in eval(clause[[1]], envir=e))
         {
             if(isTRUE(all.equal(val, obj)))
             {
                 #the implicit progn
                 body <- c(list(as.symbol("{")),
                           as.list(clause[2:length(clause)]))
-                return(eval(as.call(body)))
+                return(eval(as.call(body), envir=e))
             }
         }
     }
@@ -205,10 +218,11 @@ function(...)
         if(length(clause) <= 1)
             stop("Malformed cond clause")
 
-        if(eval(clause[[1]]))
+        e <- parent.frame()
+        if(eval(clause[[1]], envir=e))
         {
             body <- c(list(as.symbol("{")), as.list(clause[2:length(clause)]))
-            return(eval(as.call(body)))
+            return(eval(as.call(body), envir=e))
         }
     }
 
