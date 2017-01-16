@@ -20,7 +20,7 @@ defmacro(lcomp, al,
          quasiquote({
              let(list(list(.c(lvar), .c(lst))),
                  do(list(
-                     list(.c(result), nil, cond(list(.c(test), append(.c(result), list(.c(exp)))),
+                     list(.c(result), nil, cond(list(.c(test), append(.c(result), c(.c(exp)))),
                                                 list(TRUE, .c(result)))), #leave unchanged
                      list(.c(var), car(.c(lvar)), car(.c(lvar)))),
                     list(is.nil(.c(lvar)), .c(result)),
