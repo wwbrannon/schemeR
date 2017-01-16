@@ -1,9 +1,5 @@
-## Functional operators
-
 #FIXME: compose and curry should set srcref attributes so that they
 #pretty-print in a non-crazy way
-#FIXME: a composeM function for multiple-argument composition; thinking this
-#through before diving in will pay off
 
 # Resolve function objects or names
 #
@@ -88,11 +84,19 @@ function(params, ...)
 #' Compose functions
 #'
 #' Function composition is a common operation in functional programming.
-#' Given some number of functions, this function returns another function
-#' which represents their composition: for three functions f, g, h,
-#' compose(f, g, h) returns a function equivalent for all x to f(g(h(x))).
+#' Given some number of input functions, these functions return new functions
+#' which represents the composition of the inputs. That is, for three functions
+#' f, g, h, \code{compose(f, g, h)} returns a function equivalent for all x to
+#' f(g(h(x))). \code{composeM} handles the case of functions of multiple
+#' arguments.
 #'
-#' The functions passed must all take a single argument.
+#' For \code{compose}, the functions passed must all take a single argument.
+#'
+#' For \code{composeM}, the functions passed must take n >= 1 arguments, and
+#' return a list or vector. \code{composeM}'s returned function proceeds right
+#' to left through the functions it composes, applying each to the sequence of
+#' arguments returned by the previous function (via \code{\link{do.call}}). The
+#' first function is called with the actual arguments passed.
 #'
 #' If some of the \code{...} arguments are not function objects, they are
 #' resolved to function objects in the following way: character arguments
@@ -124,6 +128,19 @@ compose <-
 function(..., where=parent.frame())
 {
     helper <- function(f, g) function(x) f(g(x))
+    Reduce(helper, resolv(fns=list(...), envir=where))
+}
+
+#' @rdname compose
+#' @export
+composeM <-
+function(..., where=parent.frame())
+{
+    helper <-
+    function(f, g)
+    {
+        function(...) do.call(f, as.list(do.call(g, list(...))))
+    }
     Reduce(helper, resolv(fns=list(...), envir=where))
 }
 

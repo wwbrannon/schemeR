@@ -2,9 +2,12 @@
 % Please edit documentation in R/functional.R
 \name{compose}
 \alias{compose}
+\alias{composeM}
 \title{Compose functions}
 \usage{
 compose(..., where = parent.frame())
+
+composeM(..., where = parent.frame())
 }
 \arguments{
 \item{...}{Objects to compose. See 'Details'.}
@@ -17,12 +20,20 @@ A function representing the composition of the arguments.
 }
 \description{
 Function composition is a common operation in functional programming.
-Given some number of functions, this function returns another function
-which represents their composition: for three functions f, g, h,
-compose(f, g, h) returns a function equivalent for all x to f(g(h(x))).
+Given some number of input functions, these functions return new functions
+which represents the composition of the inputs. That is, for three functions
+f, g, h, \code{compose(f, g, h)} returns a function equivalent for all x to
+f(g(h(x))). \code{composeM} handles the case of functions of multiple
+arguments.
 }
 \details{
-The functions passed must all take a single argument.
+For \code{compose}, the functions passed must all take a single argument.
+
+For \code{composeM}, the functions passed must take n >= 1 arguments, and
+return a list or vector. \code{composeM}'s returned function proceeds right
+to left through the functions it composes, applying each to the sequence of
+arguments returned by the previous function (via \code{\link{do.call}}). The
+first function is called with the actual arguments passed.
 
 If some of the \code{...} arguments are not function objects, they are
 resolved to function objects in the following way: character arguments
