@@ -15,6 +15,7 @@ al <- replicate(length(args), alist(x=)$x)
 names(al) <- args
 
 defmacro(lcomp, al,
+     cond(list(missing(test), set(test, TRUE))),
      let(list(list(result, gensym("G1")), list(lvar, gensym("G2"))),
          quasiquote({
              let(list(list(.c(lvar), .c(lst))),
@@ -28,11 +29,13 @@ defmacro(lcomp, al,
      )
 )
 
+lcomp(x^2, `for`, x, `in`, 1:10)
 lcomp(x^2, `for`, x, `in`, 1:10, `if`, x >= 5)
 
 # A prefix version
 schemeR::schemeR({
 .(defmacro, lcomp2, .(exp, s1, var, s2, lst, s3, test),
+    .(cond, .(.(missing, test), .(set, test, TRUE))),
     .(let, .(.(result, .(gensym, "G1")), .(lvar, .(gensym, "G2"))),
         .b(.(let, .(.(.c(lvar), .c(lst))),
                 .(do, .(.(.c(result), nil, .(cond, .(.c(test), .(append, .c(result), .c(exp))),
@@ -42,4 +45,5 @@ schemeR::schemeR({
                       .(set, .c(lvar), .(cdr, .c(lvar))))))))
 }, pkg=TRUE)
 
+lcomp2(x^2, `for`, x, `in`, 1:10)
 lcomp2(x^2, `for`, x, `in`, 1:10, `if`, x >= 5)
