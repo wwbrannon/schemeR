@@ -1,5 +1,3 @@
-#FIXME: better / more function-specific examples
-
 #' Lexical binding constructs
 #'
 #' These functions provide the let, let* and letrec block-scope operators

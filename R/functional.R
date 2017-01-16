@@ -272,7 +272,6 @@ function(..., where=parent.frame())
 disjunct <-
 function(..., where=parent.frame())
 {
-    #FIXME factor all this out - macro?
     args <- list(...)
 
     resolv <- function(x) if(is.character(x))
