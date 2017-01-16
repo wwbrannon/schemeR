@@ -1,4 +1,3 @@
-#FIXME allow gensym to take a list of symbols to exclude
 #FIXME the macro needs to call eval() with envir=parent.frame(), which
 #complicates a lot of things
 #FIXME macros with ... args?
@@ -91,11 +90,14 @@ function(params, ...)
 #'
 #' \code{gensym} provides some additional control over the form of the symbol
 #' it generates: the user can specify how long the symbol should be (though
-#' asking for length-1 unique symbols is unlikely to be useful), and ask for a
-#' particular string to be prepended for ease of processing or as even more
-#' insurance against name conflicts.
+#' asking for length-1 unique symbols is unlikely to be useful), specify a list
+#' of symbols which should be discarded in favor of a new candidate if they are
+#' generated, and ask for a particular string to be prepended for ease of
+#' processing or as even more insurance against name conflicts.
 #'
 #' @param str A string to prepend to the generated symbol name.
+#' @param lst A list or vector of symbols or strings. These values are
+#' guaranteed not to be returned as the generated symbol.
 #' @param len How long (in characters) the symbol should be.
 #'
 #' @return The generated symbol.
@@ -108,8 +110,9 @@ function(params, ...)
 #'
 #' @export
 gensym <-
-function(str="G", len=10)
+function(str="G", lst=NULL, len=10)
 {
+    lst <- vapply(lst, as.character, character(1))
     nc <- nchar(str)
 
     if(length(str) > 1)
@@ -121,6 +124,33 @@ function(str="G", len=10)
 
     len <- len - nc
 
+    nm <- paste0(str, gensym_candidate(len))
+    if(!is.null(lst))
+        repeat
+        {
+            #In principle this could run for an arbitrarily long time, but the
+            #probability of going even 2 iterations is vanishingly small
+            if(!(nm %in% lst))
+                break
+
+            nm <- paste0(str, gensym_candidate(len))
+        }
+
+    return(as.symbol(nm))
+}
+
+# Generate random character strings
+#
+# This function generates random character strings of a specified length.
+# It's intended as a helper for gensym() in generating unique temporary
+# symbols.
+#
+# @param len The length of the string to return.
+#
+# @return The generated character string
+gensym_candidate <-
+function(len)
+{
     flchars <- c(letters, LETTERS)
     fl <- sample(flchars, 1)
 
@@ -129,5 +159,5 @@ function(str="G", len=10)
 
     nm <- paste0(c(fl, oc), collapse="")
 
-    return(as.symbol(paste0(str, nm)))
+    nm
 }

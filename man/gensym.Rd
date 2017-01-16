@@ -4,10 +4,13 @@
 \alias{gensym}
 \title{Build a temporary symbol}
 \usage{
-gensym(str = "G", len = 10)
+gensym(str = "G", lst = NULL, len = 10)
 }
 \arguments{
 \item{str}{A string to prepend to the generated symbol name.}
+
+\item{lst}{A list or vector of symbols or strings. These values are
+guaranteed not to be returned as the generated symbol.}
 
 \item{len}{How long (in characters) the symbol should be.}
 }
@@ -22,9 +25,10 @@ shadowing bindings already defined in an environment.
 \details{
 \code{gensym} provides some additional control over the form of the symbol
 it generates: the user can specify how long the symbol should be (though
-asking for length-1 unique symbols is unlikely to be useful), and ask for a
-particular string to be prepended for ease of processing or as even more
-insurance against name conflicts.
+asking for length-1 unique symbols is unlikely to be useful), specify a list
+of symbols which should be discarded in favor of a new candidate if they are
+generated, and ask for a particular string to be prepended for ease of
+processing or as even more insurance against name conflicts.
 }
 \seealso{
 The main use of this function is providing temporary symbols that macro
