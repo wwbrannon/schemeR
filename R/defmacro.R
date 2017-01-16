@@ -1,6 +1,6 @@
+#FIXME implement REST arguments for macros
 #FIXME the macro needs to call eval() with envir=parent.frame(), which
 #complicates a lot of things
-#FIXME macros with ... args?
 
 #' Lisp macros for R
 #'
@@ -153,7 +153,7 @@ function(len)
     fl <- sample(flchars, 1)
 
     chars <- c(letters, LETTERS, vapply(0:9, as.character, character(1)))
-    oc <- sample(chars, len - 1)
+    oc <- sample(chars, len - 1, replace=TRUE)
 
     nm <- paste0(c(fl, oc), collapse="")
 
