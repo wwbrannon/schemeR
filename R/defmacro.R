@@ -1,4 +1,8 @@
+#FIXME allow gensym to take a list of symbols to exclude
+#FIXME the macro needs to call eval() with envir=parent.frame(), which
+#complicates a lot of things
 #FIXME macros with ... args?
+#FIXME should macro substitute its parameter list?
 
 #' Lisp macros for R
 #'
@@ -51,7 +55,6 @@ function(nm, params, ...)
 macro <-
 function(params, ...)
 {
-    #FIXME? should this substitute params too?
     args <- eval(substitute(alist(...)))
 
     if(length(args) == 0)
@@ -107,7 +110,6 @@ function(params, ...)
 gensym <-
 function(str="G", len=10)
 {
-    #FIXME allow an lst argument of symbols to exclude
     nc <- nchar(str)
 
     if(length(str) > 1)
