@@ -1,3 +1,5 @@
+#FIXME macros with ... args?
+
 #' Lisp macros for R
 #'
 #' These two functions create Lisp-style macros. \code{macro} creates and
@@ -62,7 +64,7 @@ function(params, ...)
         body <- c(body, bquote(.(as.symbol(p)) <- substitute(.(as.symbol(p)))))
 
     payload <- as.call(c(list(as.symbol("{")), args))
-    s <- bquote(eval(.(payload), envir=environment(), enclos=parent.frame()))
+    s <- bquote(eval(.(payload), envir=environment()))
     body <- c(body, s)
 
     #Finally, roll it all together
@@ -105,6 +107,7 @@ function(params, ...)
 gensym <-
 function(str="G", len=10)
 {
+    #FIXME allow an lst argument of symbols to exclude
     nc <- nchar(str)
 
     if(length(str) > 1)
