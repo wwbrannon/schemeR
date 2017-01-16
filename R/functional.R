@@ -5,6 +5,37 @@
 #FIXME: a composeM function for multiple-argument composition; thinking this
 #through before diving in will pay off
 
+# Resolve function objects or names
+#
+# This function takes a list of objects, which may be functions, symbols or
+# character strings, and resolves them to function objects. Functions are
+# returned as-is; strings are looked up in the provided environment; symbols
+# are coerced to character and looked up in the provided environment. If after
+# this lookup process, any of the elements of fns are not functions, an error
+# is raised.
+#
+# @param fns A list of functions, symbols or length-1 character vectors.
+# @param envir The environment in which to look up non-function objects.
+#
+# @return The list of resolved function objects.
+resolv <-
+function(fns, envir)
+{
+    fns <-
+    lapply(fns, function(x)
+    {
+        if(is.character(x) || is.symbol(x))
+            get(as.character(x), envir=envir)
+        else
+            x
+    })
+
+    if(!all(vapply(fns, is.function, logical(1))))
+        stop("Arguments must be or resolve to functions")
+
+    fns
+}
+
 #' Construct an anonymous function in infix code
 #'
 #' This function provides the Lisp/Scheme lambda form for defining anonymous
@@ -86,25 +117,14 @@ function(params, ...)
 #' h <- function(x) x^2
 #'
 #' compose(f, g, h)(2) #=> 13 == 3(2)^2 + 1
+#' @rdname compose
+#' @name compose
 #' @export
 compose <-
 function(..., where=parent.frame())
 {
-    args <- list(...)
-
-    resolv <- function(x) if(is.character(x))
-        get(x, envir=where)
-    else if(is.symbol(x))
-        get(as.character(x), envir=where)
-    else
-        x
-    args <- lapply(args, resolv)
-
-    if(!all(vapply(args, is.function, logical(1))))
-        stop("Arguments must be or resolve to functions")
-
     helper <- function(f, g) function(x) f(g(x))
-    Reduce(helper, args)
+    Reduce(helper, resolv(fns=list(...), envir=where))
 }
 
 #' Partial function application
@@ -250,21 +270,8 @@ function(f)
 conjunct <-
 function(..., where=parent.frame())
 {
-    args <- list(...)
-
-    resolv <- function(x) if(is.character(x))
-        get(x, envir=where)
-    else if(is.symbol(x))
-        get(as.character(x), envir=where)
-    else
-        x
-    args <- lapply(args, resolv)
-
-    if(!all(vapply(args, is.function, logical(1))))
-        stop("Arguments must be or resolve to functions")
-
     helper <- function(f, g) function(x) f(x) && g(x)
-    Reduce(helper, args)
+    Reduce(helper, resolv(fns=list(...), envir=where))
 }
 
 #' @rdname connectives
@@ -272,21 +279,8 @@ function(..., where=parent.frame())
 disjunct <-
 function(..., where=parent.frame())
 {
-    args <- list(...)
-
-    resolv <- function(x) if(is.character(x))
-        get(x, envir=where)
-    else if(is.symbol(x))
-        get(as.character(x), envir=where)
-    else
-        x
-    args <- lapply(args, resolv)
-
-    if(!all(vapply(args, is.function, logical(1))))
-        stop("Arguments must be or resolve to functions")
-
     helper <- function(f, g) function(x) f(x) || g(x)
-    Reduce(helper, args)
+    Reduce(helper, resolv(fns=list(...), envir=where))
 }
 
 #' Searching for tails of sequences
