@@ -258,11 +258,11 @@ function(expr)
         } else if(expr[[1]] == as.symbol(".q"))
         {
             lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
-            return(as.call(list(as.symbol("quote"), lst)))
+            return(as.call(c(as.symbol("quote"), lst)))
         } else if(expr[[1]] == as.symbol(".b"))
         {
             lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
-            return(as.call(list(as.symbol("quasiquote"), lst)))
+            return(as.call(c(as.symbol("quasiquote"), lst)))
         } else
         {
             lst <- lapply(as.list(expr), infix_transform_quotes)
