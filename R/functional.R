@@ -1,6 +1,3 @@
-#FIXME: compose and curry should set srcref attributes so that they
-#pretty-print in a non-crazy way
-
 # Resolve function objects or names
 #
 # This function takes a list of objects, which may be functions, symbols or
@@ -127,8 +124,25 @@ function(params, ...)
 compose <-
 function(..., where=parent.frame())
 {
+    nms <- eval(substitute(alist(...)))
+
+    #Create the composed function
     helper <- function(f, g) function(x) f(g(x))
-    Reduce(helper, resolv(fns=list(...), envir=where))
+    fn <- Reduce(helper, resolv(fns=list(...), envir=where))
+
+    #Set its srcref attribute
+    txt <- "x"
+    for(nm in rev(nms))
+        txt <- c(nm, "(", c(txt, ")"))
+    txt <- c("function(x) ", txt)
+    txt <- paste0(txt, collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(fn, "srcref") <- sr
+
+    fn
 }
 
 #' @rdname compose
@@ -136,12 +150,29 @@ function(..., where=parent.frame())
 composeM <-
 function(..., where=parent.frame())
 {
+    nms <- eval(substitute(alist(...)))
+
+    #Create the composed function
     helper <-
     function(f, g)
     {
         function(...) do.call(f, as.list(do.call(g, list(...))))
     }
-    Reduce(helper, resolv(fns=list(...), envir=where))
+    fn <- Reduce(helper, resolv(fns=list(...), envir=where))
+
+    #Set its srcref attribute
+    txt <- "list(...)"
+    for(nm in rev(nms))
+        txt <- c("do.call(", nm, ", as.list(", c(txt, "))"))
+    txt <- c("function(...) ", txt)
+    txt <- paste0(txt, collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(fn, "srcref") <- sr
+
+    fn
 }
 
 #' Partial function application
@@ -201,12 +232,24 @@ function(..., where=parent.frame())
 curry <-
 function(f, ...)
 {
+    nm <- deparse(substitute(f), backtick=TRUE)
     lst <- list(...)
 
     #Straight out of a CS textbook here, but uncurry() is a bit
     #more interesting
     func <- function(...) do.call(f, c(lst, list(...)))
-    structure(func, .curried=TRUE) #we don't need to track how many times
+    func <- structure(func, .curried=TRUE) #we don't need to track how many times
+
+    #Set its srcref attribute
+    txt <- paste0("function(...) do.call(", nm, ", c(", lst,
+                  ", list(...)))", collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(func, "srcref") <- sr
+
+    func
 }
 
 #' @rdname curry
@@ -214,10 +257,22 @@ function(f, ...)
 lazy.curry <-
 function(f, ...)
 {
+    nm <- deparse(substitute(f), backtick=TRUE)
     lst <- eval(substitute(alist(...)))
 
     func <- function(...) do.call(f, c(lst, list(...)))
-    structure(func, .curried=TRUE)
+    func <- structure(func, .curried=TRUE)
+
+    #Set its srcref attribute
+    txt <- paste0("function(...) do.call(", nm, ", c(", lst,
+                  ", list(...)))", collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(func, "srcref") <- sr
+
+    func
 }
 
 #' @rdname curry
