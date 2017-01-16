@@ -1,7 +1,6 @@
 #FIXME the macro needs to call eval() with envir=parent.frame(), which
 #complicates a lot of things
 #FIXME macros with ... args?
-#FIXME should macro substitute its parameter list?
 
 #' Lisp macros for R
 #'
@@ -39,7 +38,6 @@ function(nm, params, ...)
 {
     target <- as.symbol(deparse(substitute(nm)))
     body <- eval(substitute(alist(...)))
-    params <- substitute(params)
 
     mac <- do.call(macro, c(list(params), body))
     expr <- bquote(.(target) <- .(mac))
