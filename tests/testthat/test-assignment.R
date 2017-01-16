@@ -20,6 +20,10 @@ test_that("The set operator works", {
     expect_error(set(a))
 })
 
+test_that("The sset operator works", {
+    expect_identical(sset, `<<-`)
+})
+
 test_that("The set.pos operator works", {
     f <- 1:10
     set.pos(f, 3, 10)

@@ -7,11 +7,14 @@
 \alias{set.car}
 \alias{set.cdr}
 \alias{set.pos}
+\alias{sset}
 \title{Assignment operators}
 \usage{
 define()
 
 set()
+
+sset()
 
 set.pos(nm, pos, val)
 
@@ -51,9 +54,10 @@ explicit assignment statement.
 
 The \code{define} and \code{set} functions are aliases for the built-in
 \code{<-}, and are traditional names for variable creation and assignment
-operators in Scheme. Unlike in Scheme, there's no distinction in R between
-creating a binding and assigning a value (equivalently, it's not possible
-to create an unassigned variable), so define is equivalent to set here.
+operators in Scheme. \code{sset} is also provided as an alias for
+\code{<<-}. Unlike in Scheme, there's no distinction in R between creating
+a binding and assigning a value (equivalently, it's not possible to create
+an unassigned variable), so define is equivalent to set here.
 }
 \examples{
 f <- 1:10
