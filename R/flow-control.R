@@ -325,8 +325,6 @@ function(bindings, test, ...)
     #partially constructed from lst.
     while(TRUE)
     {
-        #FIXME - several places in this file assume that parent.frame()
-        #descends from baseenv()
         ret <- eval(test[[1]], envir=e)
         if(ret) #end iteration
         {
