@@ -24,7 +24,7 @@ defmacro(lcomp, al,
                                                 list(TRUE, .c(result)))), #leave unchanged
                      list(.c(var), car(.c(lvar)), car(.c(lvar)))),
                     list(is.nil(.c(lvar)), .c(result)),
-                    set(.c(lvar), cdr(.c(lvar)))))
+                    sset(.c(lvar), cdr(.c(lvar)))))
          })
      )
 )
@@ -42,7 +42,7 @@ schemeR::schemeR({
                                                    .(TRUE, .c(result)))),
                         .(.c(var), car(.c(lvar)), car(.c(lvar)))),
                       .(.(is.nil, .c(lvar)), .c(result)),
-                      .(set, .c(lvar), .(cdr, .c(lvar))))))))
+                      .(sset, .c(lvar), .(cdr, .c(lvar))))))))
 }, pkg=TRUE)
 
 lcomp2(x^2, `for`, x, `in`, 1:10)
