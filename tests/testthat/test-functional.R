@@ -12,6 +12,11 @@ test_that("Funprog aliases and functions are correct", {
 
 test_that("Function composition is correct", {
     expect_equal(compose(sum, c)(3), sum(c(3)))
+    expect_equal(composeM(list, list)(3,4,5), list(3,4,5))
+    expect_equal(composeM(sum, list)(4,5,6,7), 22)
+
+    f <- function(...) lapply(list(...), function(x) x^2)
+    expect_equal(composeM(sum, f)(1,2,3,4,5), 55)
 
     f <- as.list(1:10)
     expect_equal(compose(car, cdr)(f), car(cdr(f)))
@@ -19,6 +24,12 @@ test_that("Function composition is correct", {
     expect_equal(compose(car, cdr, cdr)(f), car(cdr(cdr(f))))
     expect_equal(compose(cdr, car, cdr)(f), cdr(car(cdr(f))))
     expect_equal(compose(car, cdr, cdr)(f), car(cdr(cdr(f))))
+
+    expect_error(composeM(nil, nil)(3))
+    expect_error(composeM(nil, c)(3))
+    expect_error(composeM(sum, nil)(3))
+    expect_error(composeM(list(), c)(3))
+    expect_error(composeM("a", c)(3))
 
     expect_error(compose(nil, nil)(3))
     expect_error(compose(nil, c)(3))
