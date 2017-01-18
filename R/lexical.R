@@ -92,11 +92,12 @@ function(bindings, ...)
     #We need to evaluate all the inits before setting any of the variables;
     #this is not necessarily the same as evaluating them all with parent
     #parent.frame() rather than env, because they may have side effects.
-    vals <- lapply(bindings, function(x) eval(x[[length(x)]], envir=parent.frame()))
+    e <- parent.frame()
+    vals <- lapply(bindings, function(x) eval(x[[length(x)]], envir=e))
     names(vals) <- vapply(bindings, function(x) as.character(x[[length(x) - 1]]),
                           character(1))
 
-    eval(body, envir=vals, enclos=parent.frame())
+    eval(body, envir=vals, enclos=e)
 }
 
 #' @examples
@@ -146,7 +147,7 @@ function(bindings, ...)
         assign(nm, val, envir=env) #visible for subsequent evaluations
     }
 
-    eval(body, envir=env, enclos=parent.frame())
+    eval(body, envir=env)
 }
 
 #' @examples
@@ -198,8 +199,9 @@ function(bindings, ...)
     names(vals) <- vapply(bindings, function(x) as.character(x[[length(x) - 1]]),
                           character(1))
 
-    fn <- eval(call("function", as.pairlist(vals), body), envir=parent.frame())
-    environment(fn) <- parent.frame()
+    e <- parent.frame()
+    fn <- eval(call("function", as.pairlist(vals), body), envir=e)
+    environment(fn) <- e
 
     #Unlike in lambda, call it: fn only exists as a block scoping
     #mechanism, we care about the return value
