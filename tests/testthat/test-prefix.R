@@ -14,9 +14,9 @@ test_that("The . function works", {
 })
 
 test_that("Infix-to-prefix conversion works", {
-
+    #FIXME
 })
 
 test_that("Prefix-to-infix conversion works", {
-
+    #FIXME
 })

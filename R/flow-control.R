@@ -173,7 +173,11 @@ function(val, ...)
             stop("Malformed case clause")
 
         e <- parent.frame()
-        for(obj in eval(clause[[1]], envir=e))
+
+        lst <- eval(clause[[1]], envir=e)
+        lst <- if(is.language(lst)) list(lst) else lst
+
+        for(obj in lst)
         {
             if(isTRUE(all.equal(val, obj)))
             {

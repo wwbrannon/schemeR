@@ -33,23 +33,49 @@ test_that("when and unless work correctly", {
 })
 
 test_that("case works correctly", {
-    # schemeR({
-    #     .(case, .(`+`, 1, 1),
-    #         .(3, .(print, "foo")),
-    #         .(2, .(print, "bar")))
-    # })
+    f <- capture.output(case(3, list(3, cat("foo")), list(4, FALSE)))
+    expect_equal(f, "foo")
+
+    f <- capture.output(case(4, list(3, print("foo")), list(4, FALSE)))
+    expect_equal(f, "[1] FALSE")
+
+    #Evaluation of first arg
+    expect_equal(case(4 + 6,  list(quote(4 + 6), "a"), list(10, "b")), "b")
+
+    f <- case(sample(c(10,11,12), 1),  list(c(4,5,6), "a"),
+                                       list(c(10, 11, 12), "b"))
+    expect_equal(f, "b")
+
+    f <- case(sample(c(10,11,12), 1),  list(list(4,5,6), "a"),
+              list(list(10, 11, 12), "b"))
+    expect_equal(f, "b")
+
+    expect_error(case())
+    expect_error(case(3))
+    expect_error(case(3, 4))
+    expect_error(case(3, list()))
+
+    expect_equal(capture.output(schemeR({
+        .(case, .(`+`, 1, 1),
+            .(3, .(cat, "foo")),
+            .(2, .(cat, "bar")))
+    })), "bar")
 })
 
 test_that("cond works correctly", {
-    # schemeR({
-    #     .(cond,
-    #         .(.(`==`, .(`+`, 1, 4), 4), .(print, "foo")),
-    #         .(.(`==`, .(`+`, 1, 3), 5), .(print, "bar")),
-    #         .(TRUE, .(print, "baz")))
-    # })
+    #FIXME
+
+    expect_equal(capture.output(schemeR({
+        .(cond,
+            .(.(`==`, .(`+`, 1, 4), 4), .(cat, "foo")),
+            .(.(`==`, .(`+`, 1, 3), 5), .(cat, "bar")),
+            .(TRUE, .(cat, "baz")))
+    })), "baz")
 })
 
 test_that("do works correctly", {
+    #FIXME
+
     # schemeR({
     #     .(let, .(.(x, .(c, 1, 3, 5, 7, 9))),
     #         .(do, .(.(x, .(c, 1, 3, 5, 7, 9), .(cdr, x)),
