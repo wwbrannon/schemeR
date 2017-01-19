@@ -93,11 +93,10 @@ function(expr, pkg=FALSE)
     if(!is.null(pkg) && pkg)
     {
         enclos <- new.env(parent=baseenv())
-        lst <- as.list(getNamespace("schemeR"), all.names=TRUE)
-        for(i in seq_along(lst))
+        for(nm in getNamespaceExports("schemeR"))
         {
-            nm <- names(lst)[i]
-            assign(nm, lst[[nm]], envir=enclos)
+            assign(nm, get(nm, envir=getNamespace("schemeR")),
+                   envir=enclos)
         }
     }
     else

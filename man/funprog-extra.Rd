@@ -10,9 +10,9 @@
 \usage{
 delete.matching(f, x)
 
-map(f, ...)
-
 reduce(f, x, init, right = FALSE, accumulate = FALSE)
+
+map(f, ...)
 
 keep.matching(f, x)
 }
@@ -22,13 +22,13 @@ keep.matching(f, x)
 
 \item{x}{A vector.}
 
-\item{...}{As in \code{link{Map}}.}
-
 \item{init}{As in \code{link{Reduce}}.}
 
 \item{right}{As in \code{link{Reduce}}.}
 
 \item{accumulate}{As in \code{link{Reduce}}.}
+
+\item{...}{As in \code{link{Map}}.}
 }
 \value{
 \code{delete.matching} returns the elements of x for which f is not

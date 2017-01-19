@@ -26,7 +26,7 @@ element that satisfies the predicate f, or NULL if no element did.
 \code{member.if} and \code{member.if.not} search "sequences" (by which we
 mean lists, other vectors or pairlists) for the first element satisfying
 some predicate function, and return the sub-sequence beginning with that
-element.
+element. \code{member.if.not} uses Negate(f) as its predicate.
 }
 \details{
 The sequence searched is actually \code{\link{map}(k, x)} rather than x,

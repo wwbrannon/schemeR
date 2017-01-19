@@ -1,12 +1,21 @@
-## Flow-control operators
-
 #' Flow-control operators
 #'
 #' These functions provide R versions of several Scheme flow-control operators.
 #' \code{cond()} and \code{case()} are conditional forms, \code{do()} is an
 #' iteration construct, and \code{or()} and \code{and()} allow for conditional
-#' short-circuit evaluation. See the vignettes for full details and a more
-#' in-depth discussion of how to use these operators.
+#' short-circuit evaluation. \code{when} and \code{unless} execute expressions
+#' or not depending on the value of a test expression. See the vignettes for
+#' full details and a more in-depth discussion of how to use these operators.
+#'
+#' The test expression for \code{do} is either one or two elements, and is
+#' interpreted as follows: the first elment controls whether the loop
+#' continues; the second element, if provided, is the return value of the
+#' loop. If not provided, the first element's value is returned.
+#'
+#' The test expression for \code{when} and \code{unless} is a single
+#' expression, and is evaluated non-lazily. \code{when} executes its
+#' body expressions if the test expression is true; \code{unless}
+#' executes them if the test expression is false or NULL.
 #'
 #' @param val The value dispatched by case and compared with the first elements
 #' of the other clauses passed.
@@ -14,10 +23,7 @@
 #' two or three elements long; the first is a symbol, the second an initial
 #' value, and the third an expression evaluated to update the variable on each
 #' iteration. If no third element is provided, the variable is not updated.
-#' @param test The one- or two-element test expression for do. The first
-#' elment controls whether the loop continues; the second element, if provided,
-#' is the return value of the loop. If not provided, the first element's value
-#' is returned.
+#' @param test A test expression. See 'Details'.
 #' @param ... The infix form of prefix arguments. Note that for \code{and()}
 #' and \code{or()}, each element of ... is just an arbitrary R expression.
 #'
@@ -38,6 +44,8 @@
 #' expression on the first iteration on which the test expression is logically
 #' TRUE (if no second expression was provided, the value of the test expression
 #' is returned).}
+#' \item{when and unless return the value of the last body expression, if the
+#' body expressions were evaluated, or NULL.}
 #' }
 #'
 #' @examples
@@ -60,7 +68,8 @@ function(...)
     for(arg in args)
     {
         #only evaluate once in case there are side effects
-        ret <- eval(arg)
+        e <- parent.frame()
+        ret <- eval(arg, envir=e)
 
         if(!identical(as.logical(ret), FALSE))
             break
@@ -81,13 +90,52 @@ function(...)
     for(arg in args)
     {
         #only evaluate once in case there are side effects
-        ret <- eval(arg)
+        e <- parent.frame()
+        ret <- eval(arg, envir=e)
 
         if(identical(as.logical(ret), FALSE))
             break
     }
 
     return(ret)
+}
+
+#' @rdname flow-control
+#' @export
+when <-
+function(test, ...)
+{
+    args <- eval(substitute(alist(...)))
+    body <- as.call(c(list(as.symbol("{")), args))
+
+    if(!is.null(test) && test)
+    {
+        e <- parent.frame()
+        eval(body, envir=e)
+    }
+    else
+    {
+        NULL
+    }
+}
+
+#' @rdname flow-control
+#' @export
+unless <-
+function(test, ...)
+{
+    args <- eval(substitute(alist(...)))
+    body <- as.call(c(list(as.symbol("{")), args))
+
+    if(is.null(test) || !test)
+    {
+        e <- parent.frame()
+        eval(body, envir=e)
+    }
+    else
+    {
+        NULL
+    }
 }
 
 #' @examples
@@ -110,13 +158,34 @@ function(val, ...)
     {
         clause <- args[[i]]
 
-        if(length(clause) != 2)
+        if(length(clause) <= 1)
             stop("Malformed case clause")
 
-        for(obj in eval(clause[[1]]))
+        #Same hack as in the let constructs - see the comment block in let()
+        if(clause[[1]] == as.symbol("list") ||
+           clause[[1]] == as.symbol("pairlist"))
+        {
+            clause <- clause[2:length(clause)]
+        }
+
+        #check both before and after possibly removing the (pair)list symbol
+        if(length(clause) <= 1)
+            stop("Malformed case clause")
+
+        e <- parent.frame()
+
+        lst <- eval(clause[[1]], envir=e)
+        lst <- if(is.language(lst)) list(lst) else lst
+
+        for(obj in lst)
         {
             if(isTRUE(all.equal(val, obj)))
-                return(eval(clause[[2]]))
+            {
+                #the implicit progn
+                body <- c(list(as.symbol("{")),
+                          as.list(clause[2:length(clause)]))
+                return(eval(as.call(body), envir=e))
+            }
         }
     }
 
@@ -139,10 +208,25 @@ function(...)
 
     for(clause in args)
     {
-        if(eval(clause[[1]]))
+        if(length(clause) <= 1)
+            stop("Malformed cond clause")
+
+        #Same hack as in the let constructs - see the comment block in let()
+        if(clause[[1]] == as.symbol("list") ||
+           clause[[1]] == as.symbol("pairlist"))
         {
-            body <- do.call(expression, as.list(clause[2:length(clause)]))
-            return(eval(body))
+            clause <- clause[2:length(clause)]
+        }
+
+        #check both before and after possibly removing the (pair)list symbol
+        if(length(clause) <= 1)
+            stop("Malformed cond clause")
+
+        e <- parent.frame()
+        if(eval(clause[[1]], envir=e))
+        {
+            body <- c(list(as.symbol("{")), as.list(clause[2:length(clause)]))
+            return(eval(as.call(body), envir=e))
         }
     }
 
@@ -163,11 +247,40 @@ function(...)
 do <-
 function(bindings, test, ...)
 {
-    bindings <- substitute(bindings)
+    bindings <- as.list(substitute(bindings))
     test <- substitute(test)
     args <- eval(substitute(alist(...)))
 
+    #Same hack as in the let constructs - see the comment block in let()
+    if(bindings[[1]] == as.symbol("list") ||
+       bindings[[1]] == as.symbol("pairlist"))
+    {
+        bindings <- bindings[2:length(bindings)]
+    }
+
+    for(b in bindings)
+    {
+        if(length(b) %in% c(2,3))
+            TRUE #pass
+        else if(length(b) == 4 && b[[1]] == as.symbol("list"))
+            TRUE #pass
+        else if(length(b) == 4 && b[[1]] == as.symbol("pairlist"))
+            TRUE #pass
+        else
+            stop("Invalid binding for do")
+    }
+
     #The test clause
+    if(length(test) == 0)
+        stop("Invalid test clause for do")
+
+    if(test[[1]] == as.symbol("list") ||
+       test[[1]] == as.symbol("pairlist"))
+    {
+        test <- test[2:length(test)]
+    }
+
+    #check both before and after possibly removing the (pair)list symbol
     if(length(test) == 0)
         stop("Invalid test clause for do")
 
@@ -177,21 +290,19 @@ function(bindings, test, ...)
     else
         cmd <- quote(NULL)
 
-    test_expr <- ifelse(length(test) >= 2,
-                        do.call(expression, as.list(test[2:length(test)])),
-                        NULL)
-
     #The bindings and step expressions. If no step expression is given for
     #a variable "x", make "x" the step expression - it's a no-op that makes
     #this function's logic slightly simpler.
     lst <- list()
     steps <- list()
 
-    bindings <- as.list(bindings)
     for(binding in bindings)
     {
-        if(!(length(binding) %in% c(2,3)))
-            stop("Invalid binding for do")
+        if(binding[[1]] == as.symbol("list") ||
+           binding[[1]] == as.symbol("pairlist"))
+        {
+            binding <- binding[2:length(binding)]
+        }
 
         nm <- as.character(binding[[1]])
         init <- binding[[2]]
@@ -209,39 +320,36 @@ function(bindings, test, ...)
     }
 
     #Evaluate the init expressions, but not (yet) the step expressions
-    nms <- names(lst)
-    lst <- lapply(lst, eval)
-    names(lst) <- nms
+    e <- new.env(parent=parent.frame())
+    for(i in seq_along(lst))
+        assign(names(lst)[[i]], eval(lst[[i]], envir=parent.frame()), envir=e)
 
     #Begin iteration - each time around the loop, check test and decide
     #what to do. If needed, eval the step expressions in an environment
     #partially constructed from lst.
     while(TRUE)
     {
-        #FIXME - several places in this file assume that parent.frame()
-        #descends from baseenv()
-        ret <- eval(test[[1]], envir=lst, enclos=parent.frame())
-        if(ret)
+        ret <- eval(test[[1]], envir=e)
+        if(ret) #end iteration
         {
-            if(!is.null(test_expr))
-            {
-                return(eval(test_expr, envir=lst, enclos=parent.frame()))
-            } else
+            if(length(test) == 1) #no separate return expression
             {
                 return(ret)
+            } else # >= 2
+            {
+                body <- c(list(as.symbol("{")), as.list(test[2:length(test)]))
+                return(eval(as.call(body), envir=e))
             }
         } else
         {
             #Evaluate this "for effect"
-            eval(cmd, envir=lst, enclos=parent.frame())
+            eval(cmd, envir=e)
 
-            #Update the step expressions, being sure to evaluate them
-            #in a context where the previous values of the bindings are
-            #visible
-            nms <- names(lst)
-            fn <- function(x) eval(x, envir=lst, enclos=parent.frame())
-            lst <- lapply(steps, fn)
-            names(lst) <- nms
+            #Use the step expressions to update the variables (in lst),
+            #being sure to evaluate them in a context where the previous
+            #values of the bindings are visible
+            for(i in seq_along(steps))
+                assign(names(lst)[[i]], eval(steps[[i]], envir=e), envir=e)
         }
     }
 }

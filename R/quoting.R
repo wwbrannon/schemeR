@@ -63,41 +63,42 @@ function(expr, where=parent.frame())
     unquote <-
     function(e)
     {
-        if (length(e) <= 1)
+        if(is.expression(e))
         {
-            return(e)
-        }
-        else if (e[[1]] == as.symbol(".c") || e[[1]] == as.symbol(".s"))
+            lst <- lapply(as.list(e), prefix)
+            return(as.expression(lst))
+        } else if(is.call(e))
         {
-            #.c and .s are both handled identically here, but see below
-            if(length(e) > 2)
-                stop(paste0("Too many arguments to ", as.character(e[[1]])))
+            if (e[[1]] == as.symbol(".c") || e[[1]] == as.symbol(".s"))
+            {
+                #.c and .s are both handled identically here, but see below
+                if(length(e) == 1)
+                    return(NULL)
+                else if(length(e) > 2)
+                    stop(paste0("Too many arguments to ", as.character(e[[1]])))
+                else
+                    return(eval(e[[2]], envir=where))
+            } else
+            {
+                alt <- list()
+                ret <- lapply(e, unquote)
 
-            return(eval(e[[2]], envir=where))
-        }
-        else if(is.pairlist(e))
+                for(i in seq_along(e))
+                {
+                    if(length(e[[i]]) > 1 && e[[i]][[1]] == ".s")
+                        alt <- c(alt, ret[[i]])
+                    else
+                        alt <- c(alt, list(ret[[i]]))
+                }
+
+                return(as.call(alt))
+            }
+        } else if(is.pairlist(e))
         {
             return(as.pairlist(lapply(e, unquote)))
         } else
         {
-            alt <- list()
-            ret <- lapply(e, unquote)
-
-            for(i in seq_along(e))
-            {
-                if(length(e[[i]]) > 1 && e[[i]][[1]] == ".s")
-                {
-                    alt <- c(alt, ret[[i]])
-                } else
-                {
-                    if(is.null(ret[[i]]))
-                        alt <- c(alt, list(ret[[i]]))
-                    else
-                        alt[[length(alt) + 1]] <- ret[[i]]
-                }
-            }
-
-            return(as.call(alt))
+            return(e)
         }
     }
 

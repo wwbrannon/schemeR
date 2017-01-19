@@ -2,6 +2,8 @@ context("Quoting")
 
 test_that("Quasiquote works", {
     #Interpolation
+    expect_null(quasiquote(.c()))
+
     f <- list(4,5,6)
     expect_equal(
         eval(quasiquote(list(1, 2, 3, .c(f), 7, 8, 9))),
@@ -33,6 +35,8 @@ test_that("Quasiquote works", {
     )
 
     #Splicing
+    expect_null(quasiquote(.c()))
+
     f <- list("a", "b", "c")
     expect_equal(
         eval(quasiquote(c(1, 2, 3, .s(f), 7, 8, 9))),

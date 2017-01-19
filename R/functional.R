@@ -1,9 +1,33 @@
-## Functional operators
+# Resolve function objects or names
+#
+# This function takes a list of objects, which may be functions, symbols or
+# character strings, and resolves them to function objects. Functions are
+# returned as-is; strings are looked up in the provided environment; symbols
+# are coerced to character and looked up in the provided environment. If after
+# this lookup process, any of the elements of fns are not functions, an error
+# is raised.
+#
+# @param fns A list of functions, symbols or length-1 character vectors.
+# @param envir The environment in which to look up non-function objects.
+#
+# @return The list of resolved function objects.
+resolv <-
+function(fns, envir)
+{
+    fns <-
+    lapply(fns, function(x)
+    {
+        if(is.character(x) || is.symbol(x))
+            get(as.character(x), envir=envir)
+        else
+            x
+    })
 
-#FIXME: compose and curry should set srcref attributes so that they
-#pretty-print in a non-crazy way
-#FIXME: a composeM function for multiple-argument composition; thinking this
-#through before diving in will pay off
+    if(!all(vapply(fns, is.function, logical(1))))
+        stop("Arguments must be or resolve to functions")
+
+    fns
+}
 
 #' Construct an anonymous function in infix code
 #'
@@ -57,11 +81,19 @@ function(params, ...)
 #' Compose functions
 #'
 #' Function composition is a common operation in functional programming.
-#' Given some number of functions, this function returns another function
-#' which represents their composition: for three functions f, g, h,
-#' compose(f, g, h) returns a function equivalent for all x to f(g(h(x))).
+#' Given some number of input functions, these functions return new functions
+#' which represents the composition of the inputs. That is, for three functions
+#' f, g, h, \code{compose(f, g, h)} returns a function equivalent for all x to
+#' f(g(h(x))). \code{composeM} handles the case of functions of multiple
+#' arguments.
 #'
-#' The functions passed must all take a single argument.
+#' For \code{compose}, the functions passed must all take a single argument.
+#'
+#' For \code{composeM}, the functions passed must take n >= 1 arguments, and
+#' return a list or vector. \code{composeM}'s returned function proceeds right
+#' to left through the functions it composes, applying each to the sequence of
+#' arguments returned by the previous function (via \code{\link{do.call}}). The
+#' first function is called with the actual arguments passed.
 #'
 #' If some of the \code{...} arguments are not function objects, they are
 #' resolved to function objects in the following way: character arguments
@@ -86,26 +118,61 @@ function(params, ...)
 #' h <- function(x) x^2
 #'
 #' compose(f, g, h)(2) #=> 13 == 3(2)^2 + 1
+#' @rdname compose
+#' @name compose
 #' @export
 compose <-
 function(..., where=parent.frame())
 {
-    cl <- match.call()
-    args <- list(...)
+    nms <- eval(substitute(alist(...)))
 
-    resolv <- function(x) if(is.character(x))
-        get(x, envir=where)
-    else if(is.symbol(x))
-        get(as.character(x), envir=where)
-    else
-        x
-    args <- lapply(args, resolv)
-
-    if(!all(vapply(args, is.function, logical(1))))
-        stop("Arguments must be or resolve to functions")
-
+    #Create the composed function
     helper <- function(f, g) function(x) f(g(x))
-    Reduce(helper, args)
+    fn <- Reduce(helper, resolv(fns=list(...), envir=where))
+
+    #Set its srcref attribute
+    txt <- "x"
+    for(nm in rev(nms))
+        txt <- c(nm, "(", c(txt, ")"))
+    txt <- c("function(x) ", txt)
+    txt <- paste0(txt, collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(fn, "srcref") <- sr
+
+    fn
+}
+
+#' @rdname compose
+#' @export
+composeM <-
+function(..., where=parent.frame())
+{
+    nms <- eval(substitute(alist(...)))
+
+    #Create the composed function
+    helper <-
+    function(f, g)
+    {
+        function(...) do.call(f, as.list(do.call(g, list(...))))
+    }
+    fn <- Reduce(helper, resolv(fns=list(...), envir=where))
+
+    #Set its srcref attribute
+    txt <- "list(...)"
+    for(nm in rev(nms))
+        txt <- c("do.call(", nm, ", as.list(", c(txt, "))"))
+    txt <- c("function(...) ", txt)
+    txt <- paste0(txt, collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(fn, "srcref") <- sr
+
+    fn
 }
 
 #' Partial function application
@@ -165,12 +232,24 @@ function(..., where=parent.frame())
 curry <-
 function(f, ...)
 {
+    nm <- deparse(substitute(f), backtick=TRUE)
     lst <- list(...)
 
     #Straight out of a CS textbook here, but uncurry() is a bit
     #more interesting
     func <- function(...) do.call(f, c(lst, list(...)))
-    structure(func, .curried=TRUE) #we don't need to track how many times
+    func <- structure(func, .curried=TRUE) #we don't need to track how many times
+
+    #Set its srcref attribute
+    txt <- paste0("function(...) do.call(", nm, ", c(", lst,
+                  ", list(...)))", collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(func, "srcref") <- sr
+
+    func
 }
 
 #' @rdname curry
@@ -178,10 +257,22 @@ function(f, ...)
 lazy.curry <-
 function(f, ...)
 {
+    nm <- deparse(substitute(f), backtick=TRUE)
     lst <- eval(substitute(alist(...)))
 
     func <- function(...) do.call(f, c(lst, list(...)))
-    structure(func, .curried=TRUE)
+    func <- structure(func, .curried=TRUE)
+
+    #Set its srcref attribute
+    txt <- paste0("function(...) do.call(", nm, ", c(", lst,
+                  ", list(...)))", collapse="")
+
+    s <- srcfilecopy("dummy.R", txt)
+    sr <- srcref(s, c(1, 1, 1, nchar(txt)))
+
+    attr(func, "srcref") <- sr
+
+    func
 }
 
 #' @rdname curry
@@ -204,12 +295,72 @@ function(f)
     get(as.character(body(f)[[2]]), envir=environment(f), inherits=FALSE)
 }
 
+#' Conjunction and disjunction
+#'
+#' \code{conjunct} and \code{disjunct} construct and return functions which
+#' represent the conjunction or disjunction of predicates.
+#'
+#' The functions passed must all take a single argument.
+#'
+#' If some of the \code{...} arguments are not function objects, they are
+#' resolved to function objects in the following way: character arguments
+#' are looked up in the provided \code{where} environment; symbol arguments
+#' are coerced to character and then looked up in the \code{where} environment;
+#' other types of arguments, or symbol/character arguments which fail to
+#' resolve to a function object, raise an error.
+#'
+#' @param ... Predicate functions whose conjunction or disjunction to return.
+#' @param where An environment in which to resolve any character or
+#' symbol arguments.
+#'
+#' @return A function of a single argument, representing the conjunction or
+#' disjunction of the predicates' values on its argument.
+#'
+#' @seealso
+#' \code{compose}, which returns the composition rather than the conjunction or
+#' disjunction.
+#'
+#' @examples
+#' f <- conjunct(is.positive, is.odd)
+#' g <- conjunct(is.positive, is.zero)
+#' h <- disjunct(is.negative, is.odd)
+#'
+#' f(3) == TRUE
+#' f(2) == FALSE
+#'
+#' #false for all x - no positive numbers are 0
+#' g(0) == FALSE
+#' g(10) == FALSE
+#'
+#' h(10) == FALSE
+#' h(-10) == TRUE
+#' h(3) == TRUE
+#'
+#' @rdname connectives
+#' @name connectives
+#' @export
+conjunct <-
+function(..., where=parent.frame())
+{
+    helper <- function(f, g) function(x) f(x) && g(x)
+    Reduce(helper, resolv(fns=list(...), envir=where))
+}
+
+#' @rdname connectives
+#' @export
+disjunct <-
+function(..., where=parent.frame())
+{
+    helper <- function(f, g) function(x) f(x) || g(x)
+    Reduce(helper, resolv(fns=list(...), envir=where))
+}
+
 #' Searching for tails of sequences
 #'
 #' \code{member.if} and \code{member.if.not} search "sequences" (by which we
 #' mean lists, other vectors or pairlists) for the first element satisfying
 #' some predicate function, and return the sub-sequence beginning with that
-#' element.
+#' element. \code{member.if.not} uses Negate(f) as its predicate.
 #'
 #' The sequence searched is actually \code{\link{map}(k, x)} rather than x,
 #' which makes it easier to avoid defining short anonymous functions.
@@ -243,8 +394,13 @@ function(f, x, k=identity)
 {
     for(i in seq_along(x))
     {
-        if(f(k(x[[i]])))
-            return(x[i:length(x)])
+        if( compose(f, k)(x[[i]]) )
+        {
+            if(is.pairlist(x))
+                return(as.pairlist(x[i:length(x)]))
+            else
+                return(x[i:length(x)])
+        }
     }
 
     return(NULL)
@@ -255,7 +411,7 @@ function(f, x, k=identity)
 member.if.not <-
 function(f, x, k=identity)
 {
-    return(member.if(Negate(f), x=x, k=k))
+    return(member.if(f=do.call(Negate, list(f)), x=x, k=k))
 }
 
 #' Transposition of sequences
@@ -292,10 +448,18 @@ function(f, x, k=identity)
 zip <-
 function(...)
 {
-    args <- list(function(...) { return(list(...)) })
-    args <- c(args, list(...))
+    args <- list(...)
 
-    return(do.call(curry(mapply, SIMPLIFY=FALSE), args))
+    if(length(args) == 0)
+        return(list())
+
+    if(min(vapply(args, length, numeric(1))) == 0)
+        return(list())
+
+    lst <- list(function(...) { return(list(...)) })
+    lst <- c(lst, args)
+
+    return(do.call(curry(mapply, SIMPLIFY=FALSE), lst))
 }
 
 #' Zipped function application
@@ -383,25 +547,12 @@ function(f, x)
 
 #' @rdname funprog-extra
 #' @export
-map <-
-function(f, ...)
-{
-    return(do.call(curry(Map, f), list(...)))
-}
+reduce <- Reduce
 
 #' @rdname funprog-extra
 #' @export
-reduce <-
-function(f, x, init, right = FALSE, accumulate = FALSE)
-{
-    return(Reduce(f=f, x=x, init=init, right=right, accumulate=accumulate))
-}
+map <- Map
 
 #' @rdname funprog-extra
 #' @export
-keep.matching <-
-function(f, x)
-{
-    return(Filter(f=f, x=x))
-}
-
+keep.matching <- Filter

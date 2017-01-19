@@ -40,11 +40,7 @@ function(...)
 
 #' @rdname list-utilities
 #' @export
-reverse <-
-function(x)
-{
-    return(rev(x))
-}
+reverse <- rev
 
 #' @rdname list-utilities
 #' @export
@@ -105,7 +101,10 @@ function(n, expr)
 car <-
 function(x)
 {
-    return(x[[1]])
+    if(length(x) == 0)
+        NULL
+    else
+        x[[1]]
 }
 
 #' @rdname list-access
@@ -113,33 +112,23 @@ function(x)
 cdr <-
 function(x)
 {
-    #Valid for both lists and vectors
     ret <- x[-1]
-    if(length(ret) != 0)
-        return(ret)
+
+    if(length(ret) == 0)
+        NULL
+    else if(is.pairlist(x))
+        as.pairlist(ret)
     else
-        return(NULL)
-}
-
-#' @rdname list-access
-#' @export
-last <-
-function(x)
-{
-    n <- length(x)
-
-    if(is.list(x) || is.pairlist(x))
-    {
-        return(x[[n]])
-    } else
-    {
-        return(x[n])
-    }
+        ret
 }
 
 #' @rdname list-access
 #' @export
 first <- car
+
+#' @rdname list-access
+#' @export
+last <- compose(car, reverse)
 
 #' @rdname list-access
 #' @export

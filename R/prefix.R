@@ -134,14 +134,14 @@ function(expr)
                 params <- as.list(expr[[3]])[-1]
                 params <- lapply(params, infix_transform_dots)
 
+                if(is.null(names(params)))
+                    nms <- replicate(length(params), "")
+                else
+                    nms <- names(params)
+
                 vals <- list()
                 for(i in seq_along(params))
                 {
-                    if(is.null(names(params)))
-                        nms <- c("")
-                    else
-                        nms <- names(params)
-
                     #passing "m" and "m=" are equivalent, but because R is
                     #terrible, are represented differently. this case is what
                     #we see when you pass "m" w/o the equals sign
@@ -180,15 +180,15 @@ function(expr)
                 params <- as.list(expr[[4]])[-1]
                 params <- lapply(params, infix_transform_dots)
 
+                if(is.null(names(params)))
+                    nms <- replicate(length(params), "")
+                else
+                    nms <- names(params)
+
                 vals <- list()
                 for(i in seq_along(params))
                 {
-                    if(is.null(names(params)))
-                        nms <- c("")
-                    else
-                        nms <- names(params)
-
-                    if(names(params)[[i]] == "")
+                    if(nms[[i]] == "")
                     {
                         nm <- as.character(params[[i]])
 
@@ -258,11 +258,11 @@ function(expr)
         } else if(expr[[1]] == as.symbol(".q"))
         {
             lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
-            return(as.call(list(as.symbol("quote"), lst)))
+            return(as.call(c(as.symbol("quote"), lst)))
         } else if(expr[[1]] == as.symbol(".b"))
         {
             lst <- lapply(as.list(expr[-1]), infix_transform_quotes)
-            return(as.call(list(as.symbol("quasiquote"), lst)))
+            return(as.call(c(as.symbol("quasiquote"), lst)))
         } else
         {
             lst <- lapply(as.list(expr), infix_transform_quotes)

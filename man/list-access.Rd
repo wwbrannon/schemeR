@@ -40,9 +40,9 @@ car(x)
 
 cdr(x)
 
-last(x)
-
 first(x)
+
+last(x)
 
 caar(x)
 
