@@ -63,7 +63,20 @@ test_that("case works correctly", {
 })
 
 test_that("cond works correctly", {
-    #FIXME
+    expect_null(cond())
+
+    expect_equal(cond(list(3, "a"), list(4, "b")), "a")
+    expect_equal(cond(list(FALSE, "a"), list(4, "b")), "b")
+    expect_equal(cond(list(0, "a"), list(4, "b")), "b")
+    expect_equal(capture.output(cond(list(FALSE, cat("foo")),
+                                     list(TRUE, cat("bar")))),
+                 "bar")
+
+    expect_error(cond(3))
+    expect_error(cond(3, 4))
+    expect_error(cond(list(3), 4))
+    expect_error(cond(list(3), list(4)))
+    expect_error(suppressWarnings(cond(list(quote(3+4), "a"), list(TRUE, "b"))))
 
     expect_equal(capture.output(schemeR({
         .(cond,
