@@ -347,9 +347,17 @@ function(bindings, test, ...)
 
             #Use the step expressions to update the variables (in lst),
             #being sure to evaluate them in a context where the previous
-            #values of the bindings are visible
+            #values of the bindings are visible. The tmp environment and
+            #the separate evaluation and rebinding steps make it so that
+            #all step expressions are recomputed before any of the variables
+            #are rebound, which is Scheme's behavior.
+            tmp <- new.env(parent=emptyenv())
+
             for(i in seq_along(steps))
-                assign(names(lst)[[i]], eval(steps[[i]], envir=e), envir=e)
+                assign(names(lst)[[i]], eval(steps[[i]], envir=e), envir=tmp)
+
+            for(nm in ls(envir=tmp))
+                assign(nm, get(nm, envir=tmp), envir=e)
         }
     }
 }
