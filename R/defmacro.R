@@ -42,6 +42,7 @@ function(nm, params, ...)
     mac <- do.call(macro, c(list(params), body))
     expr <- bquote(.(target) <- .(mac))
 
+    #evaluate this purely for side effects
     eval(expr, envir=parent.frame())
 
     return(target)
@@ -59,25 +60,47 @@ function(params, ...)
 
     #Put the body together; the hard part of doing this is
     #the need for the macro to substitute all of its args
+    rv <- gensym(lst=names(params))
+    lv <- gensym(lst=c(names(params), as.character(rv)))
+    #ev <- gensym(lst=c(names(params), as.character(rv), as.character(lv)))
+
     body <- list(as.symbol("{"))
+
+    #s <- bquote(.(ev) <- new.env(parent=environment()))
+    #body <- c(body, s)
+
     for(p in names(params))
-        body <- c(body, bquote(.(as.symbol(p)) <- substitute(.(as.symbol(p)))))
+        body <- c(body, bquote(assign(.(p), substitute(.(as.symbol(p))),
+                                      envir=environment())))
 
     payload <- as.call(c(list(as.symbol("{")), args))
-    s <- bquote(eval(.(payload), envir=environment()))
+    s <- bquote(.(rv) <- eval(.(payload), envir=environment()))
+    body <- c(body, s)
+
+    #Two aspects of how Lisp macros work are in tension here: we need to have
+    #a real function computing the macro expansion (rather than just something
+    #like eval(substitute(expr)), which is more limited), and we need to make
+    #it look like this is expanding inline and able to make modifications at
+    #containing scope. The only semi-decent way to do that is to examine the
+    #execution environment after evaluating the payload, find any new bindings
+    #that aren't the macro's formals, and make the same bindings in the
+    #caller's environment. The formals themselves shouldn't clutter up the
+    #parent frame, just as in Lisp.
+    s <- bquote(
+        `for`(.(lv), ls(envir=environment()),
+            if( !(.(lv) %in% c(names(formals()), .(as.character(rv)),
+                               .(as.character(lv)))) )
+                assign(.(as.character(lv)), get(.(as.character(lv)),
+                                                envir=environment()),
+                       envir=parent.frame())))
+    body <- c(body, s)
+
+    s <- bquote(return(.(rv)))
     body <- c(body, s)
 
     #Finally, roll it all together
-    fn <- eval(call("function", as.pairlist(params), as.call(body)),
-               envir=parent.frame())
-
-    #Setting the environment here ensures that, as in lambda(), this function
-    #closes over variables in the environment where the macro was defined; free
-    #variables in body will, in other words, be resolved against the
-    #environment the body statements came from
-    environment(fn) <- parent.frame()
-
-    fn
+    e <- parent.frame()
+    eval(call("function", as.pairlist(params), as.call(body)), envir=e)
 }
 
 #' Build a temporary symbol
