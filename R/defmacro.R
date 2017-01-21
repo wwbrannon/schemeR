@@ -1,4 +1,3 @@
-#FIXME implement REST arguments for macros
 #FIXME the macro needs to call eval() with envir=parent.frame(), which
 #complicates a lot of things
 
@@ -69,7 +68,26 @@ function(params, ...)
     #s <- bquote(.(ev) <- new.env(parent=environment()))
     #body <- c(body, s)
 
-    for(p in names(params))
+    ri <- which(names(params) == "REST")
+    if(length(ri) > 0)
+    {
+        if(ri == length(params))
+            stop("Missing name for REST arguments")
+        if(params[[ri]] != alist(x=)$x)
+            stop("Cannot provide a default value for REST argument")
+        if(params[[ri + 1]] != alist(x=)$x)
+            stop("Cannot provide a default value for REST argument")
+
+        nm <- names(params)[ri + 1]
+        s <- bquote(assign(.(nm), eval(substitute(alist(...))),
+                           envir=environment()))
+        body <- c(body, s)
+
+        names(params)[ri + 1] <- "..."
+        params[[ri]] <- NULL
+    }
+
+    for(p in setdiff(names(params), c("...")))
         body <- c(body, bquote(assign(.(p), substitute(.(as.symbol(p))),
                                       envir=environment())))
 
