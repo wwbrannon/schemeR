@@ -89,12 +89,9 @@ test_that("cond works correctly", {
 test_that("do works correctly", {
     #FIXME
 
-    # schemeR({
-    #     .(let, .(.(x, .(c, 1, 3, 5, 7, 9))),
-    #         .(do, .(.(x, .(c, 1, 3, 5, 7, 9), .(cdr, x)),
-    #                 .(s, 0, .(`+`, s, .(car, x))),
-    #                 .(foo, 4)),
-    #             .(.(is.nil, x), s),
-    #     TRUE)) == 25
-    # })
+    expect_equal(schemeR({
+        .(do, .(.(x, .(c, 1, 3, 5, 7, 9), .(cdr, x)),
+                .(s, 0, .(`+`, s, .(car, x)))),
+            .(.(is.nil, x), s))
+    }), 25)
 })
