@@ -61,12 +61,13 @@ function(params, ...)
     #the need for the macro to substitute all of its args
     rv <- gensym(lst=names(params))
     lv <- gensym(lst=c(names(params), as.character(rv)))
-    #ev <- gensym(lst=c(names(params), as.character(rv), as.character(lv)))
+    ev <- gensym(lst=c(names(params), as.character(rv), as.character(lv)))
 
     body <- list(as.symbol("{"))
 
     #s <- bquote(.(ev) <- new.env(parent=environment()))
-    #body <- c(body, s)
+    s <- bquote(.(ev) <- environment())
+    body <- c(body, s)
 
     ri <- which(names(params) == "REST")
     if(length(ri) > 0)
@@ -80,7 +81,7 @@ function(params, ...)
 
         nm <- names(params)[ri + 1]
         s <- bquote(assign(.(nm), eval(substitute(alist(...))),
-                           envir=environment()))
+                           envir=.(ev)))
         body <- c(body, s)
 
         names(params)[ri + 1] <- "..."
@@ -89,10 +90,10 @@ function(params, ...)
 
     for(p in setdiff(names(params), c("...")))
         body <- c(body, bquote(assign(.(p), substitute(.(as.symbol(p))),
-                                      envir=environment())))
+                                      envir=.(ev))))
 
     payload <- as.call(c(list(as.symbol("{")), args))
-    s <- bquote(.(rv) <- eval(.(payload), envir=environment()))
+    s <- bquote(.(rv) <- eval(.(payload), envir=.(ev)))
     body <- c(body, s)
 
     #Two aspects of how Lisp macros work are in tension here: we need to have
@@ -105,11 +106,11 @@ function(params, ...)
     #caller's environment. The formals themselves shouldn't clutter up the
     #parent frame, just as in Lisp.
     s <- bquote(
-        `for`(.(lv), ls(envir=environment()),
+        `for`(.(lv), ls(envir=.(ev)),
             if( !(.(lv) %in% c(names(formals()), .(as.character(rv)),
                                .(as.character(lv)))) )
                 assign(.(as.character(lv)), get(.(as.character(lv)),
-                                                envir=environment()),
+                                                envir=.(ev)),
                        envir=parent.frame())))
     body <- c(body, s)
 
