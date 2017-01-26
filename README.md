@@ -24,10 +24,10 @@ invisible(
 for(i in x)
     print(1:i)
 )
-#> [1] 1 2 3 4 5 6
-#> [1] 1 2 3 4 5 6
+#> [1] 1
+#> [1] 1 2
+#> [1] 1 2 3 4
 #> [1] 1 2 3 4 5 6 7 8
-#> [1] 1 2 3 4 5 6 7 8 9
 #>  [1]  1  2  3  4  5  6  7  8  9 10
 
 #Equivalent, but prefix:
@@ -36,10 +36,10 @@ schemeR({
   .(`for`, i, x,
     .(print, .(`:`, 1, i))))
 })
-#> [1] 1 2 3 4 5 6
-#> [1] 1 2 3 4 5 6
+#> [1] 1
+#> [1] 1 2
+#> [1] 1 2 3 4
 #> [1] 1 2 3 4 5 6 7 8
-#> [1] 1 2 3 4 5 6 7 8 9
 #>  [1]  1  2  3  4  5  6  7  8  9 10
 ```
 
@@ -104,7 +104,7 @@ schemeR(
 #>  [1]   1   4   9  16  25  36  49  64  81 100
 
 schemeR(
-.(list.of, x^2, `for`, x, `in`, 1:10, `if`, .(`>=`, x, 5))
+    .(list.of, x^2, `for`, x, `in`, 1:10, `if`, .(`>=`, x, 5))
 )
 #> [1]  25  36  49  64  81 100
 
@@ -112,20 +112,24 @@ schemeR(
 # words, but you're free to use syntactic names if you want, because the macro
 # discards those arguments anyway:
 schemeR(
-.(list.of, x^2, with, x, of, 1:10)
+    .(list.of, x^2, with, x, of, 1:10)
 )
 #>  [1]   1   4   9  16  25  36  49  64  81 100
 
 schemeR(
-.(list.of, x^2, with, x, of, 1:10, where, .(`>=`, x, 5))
+    .(list.of, x^2, with, x, of, 1:10, where, .(`>=`, x, 5))
 )
 #> [1]  25  36  49  64  81 100
 ```
 
-Installation:
--------------
+Installation
+------------
 
-Because schemeR is not (yet) on CRAN, install the dev version from github:
+Install the released version from CRAN:
+
+    install.packages("schemeR")
+
+Install the dev version from github:
 
     install.packages("devtools")
     devtools::install_github("wwbrannon/schemeR")

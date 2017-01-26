@@ -117,23 +117,28 @@ schemeR(
 )
 
 schemeR(
-.(list.of, x^2, `for`, x, `in`, 1:10, `if`, .(`>=`, x, 5))
+    .(list.of, x^2, `for`, x, `in`, 1:10, `if`, .(`>=`, x, 5))
 )
 
 # You have to backtick-quote "for", "in" and "if" because they're R reserved
 # words, but you're free to use syntactic names if you want, because the macro
 # discards those arguments anyway:
 schemeR(
-.(list.of, x^2, with, x, of, 1:10)
+    .(list.of, x^2, with, x, of, 1:10)
 )
 
 schemeR(
-.(list.of, x^2, with, x, of, 1:10, where, .(`>=`, x, 5))
+    .(list.of, x^2, with, x, of, 1:10, where, .(`>=`, x, 5))
 )
 ```
 
-## Installation:
-Because schemeR is not (yet) on CRAN, install the dev version from github:
+## Installation
+Install the released version from CRAN:
+```
+install.packages("schemeR")
+```
+
+Install the dev version from github:
 ```
 install.packages("devtools")
 devtools::install_github("wwbrannon/schemeR")
