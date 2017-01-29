@@ -72,7 +72,7 @@ function(bindings, ...)
     if(bindings[[1]] == as.symbol("list") ||
        bindings[[1]] == as.symbol("pairlist"))
     {
-        bindings <- bindings[2:length(bindings)]
+        bindings <- bindings[-1]
     }
 
     for(b in bindings)
@@ -120,7 +120,7 @@ function(bindings, ...)
     if(bindings[[1]] == as.symbol("list") ||
        bindings[[1]] == as.symbol("pairlist"))
     {
-        bindings <- bindings[2:length(bindings)]
+        bindings <- bindings[-1]
     }
 
     for(b in bindings)
@@ -176,7 +176,7 @@ function(bindings, ...)
     if(bindings[[1]] == as.symbol("list") ||
        bindings[[1]] == as.symbol("pairlist"))
     {
-        bindings <- bindings[2:length(bindings)]
+        bindings <- bindings[-1]
     }
 
     for(b in bindings)
