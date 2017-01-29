@@ -5,9 +5,9 @@
 schemeR
 =======
 
-The schemeR package provides a Lisp-like mini-language within R, with a prefix syntax and versions of many of the usual Lisp operators (let, cond, do, functional programming utilities, etc.). Code written with this package is still valid R, but the differences from what R code normally looks like highlight the language's roots in Scheme.
+The schemeR package provides a Lisp-like mini-language within R, with a prefix syntax, versions of many of the usual Lisp operators (let, cond, do, functional programming utilities, etc.), and Common Lisp-style macros. Code written with this package is still valid R, but the differences from what R code normally looks like highlight the language's roots in Scheme.
 
-Real Lisp macros (the "non-hygienic", defmacro-based variety) are also supported. The implementation hews more closely to the way macros work in Common Lisp than other macro implementations for R, such as the one in the gtools package. Future work on schemeR will include an exploration of hygienic macros and whether they can be implemented as well.
+The macros we've implemented are the "non-hygienic" or defmacro-based variety, as in Common Lisp, rather than the hygienic kind found in Scheme. The implementation hews more closely to the way macros work in Common Lisp than other macro implementations for R, such as the one in the gtools package. Future work on schemeR will include an exploration of hygienic macros and whether they can be implemented as well.
 
 Basic usage
 -----------
@@ -24,11 +24,11 @@ invisible(
 for(i in x)
     print(1:i)
 )
-#> [1] 1
-#> [1] 1 2
+#> [1] 1 2 3
 #> [1] 1 2 3 4
-#> [1] 1 2 3 4 5 6 7 8
-#>  [1]  1  2  3  4  5  6  7  8  9 10
+#> [1] 1 2 3 4 5
+#> [1] 1 2 3 4 5
+#> [1] 1 2 3 4 5 6 7
 
 #Equivalent, but prefix:
 schemeR({
@@ -36,11 +36,11 @@ schemeR({
   .(`for`, i, x,
     .(print, .(`:`, 1, i))))
 })
-#> [1] 1
-#> [1] 1 2
+#> [1] 1 2 3
 #> [1] 1 2 3 4
-#> [1] 1 2 3 4 5 6 7 8
-#>  [1]  1  2  3  4  5  6  7  8  9 10
+#> [1] 1 2 3 4 5
+#> [1] 1 2 3 4 5
+#> [1] 1 2 3 4 5 6 7
 ```
 
 The `.` that appears in the prefix code is a function, which is how we can manage to write R this way and still have it parse. The unusual-for-Lisp syntax on display in prefix code is a consequence: lists must start with a `.(` rather than just a parenthesis, and elements are separated by commas rather than whitespace (because as far as R's parser is concerned, they're function arguments).

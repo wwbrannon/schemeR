@@ -41,9 +41,9 @@ knit_hooks$set(output = function(x, options) {
 
 # schemeR
 
-The schemeR package provides a Lisp-like mini-language within R, with a prefix syntax and versions of many of the usual Lisp operators (let, cond, do, functional programming utilities, etc.). Code written with this package is still valid R, but the differences from what R code normally looks like highlight the language's roots in Scheme.
+The schemeR package provides a Lisp-like mini-language within R, with a prefix syntax, versions of many of the usual Lisp operators (let, cond, do, functional programming utilities, etc.), and Common Lisp-style macros. Code written with this package is still valid R, but the differences from what R code normally looks like highlight the language's roots in Scheme.
 
-Real Lisp macros (the "non-hygienic", defmacro-based variety) are also supported. The implementation hews more closely to the way macros work in Common Lisp than other macro implementations for R, such as the one in the gtools package. Future work on schemeR will include an exploration of hygienic macros and whether they can be implemented as well.
+The macros we've implemented are the "non-hygienic" or defmacro-based variety, as in Common Lisp, rather than the hygienic kind found in Scheme. The implementation hews more closely to the way macros work in Common Lisp than other macro implementations for R, such as the one in the gtools package. Future work on schemeR will include an exploration of hygienic macros and whether they can be implemented as well.
 
 ## Basic usage
 The main entry point is the `schemeR()` function, which takes code written in this package's prefix style, translates it to the usual R syntax, and executes it.
