@@ -3,10 +3,13 @@ Type: Package
 Authors@R: c(person("William", "Brannon", email="wwbrannon@email.wm.edu", role=c("aut", "cre")))
 Title: Ports of Lisp/Scheme Features to R
 Version: 0.1.0.9000
-Description: Provides a way to write R code in a Lisp-like prefix form, with
-    access to versions of many common Lisp operators (let, letrec, cond, do,
-    etc.). True Lisp macros (defmacro-based, rather than syntax-case) are
-    also supported and are optimized to work with this sort of prefix code.
+Description: Provides a Lisp-like mini-language within R, with a prefix syntax
+    and versions of many of the usual Lisp operators (let, cond, do, functional
+    programming utilities, etc.). Code written with this package is still valid
+    R, but the differences from what R code normally looks like highlight the
+    language's roots in Scheme. Common Lisp-style macros, based on defmacro,
+    are also supported, with an implementation much closer to Lisp's behavior
+    than other macro implementations for R.
 License: MIT + file LICENSE
 URL: https://github.com/wwbrannon/schemeR
 BugReports: https://github.com/wwbrannon/schemeR/issues
