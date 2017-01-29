@@ -165,7 +165,7 @@ function(val, ...)
         if(clause[[1]] == as.symbol("list") ||
            clause[[1]] == as.symbol("pairlist"))
         {
-            clause <- clause[2:length(clause)]
+            clause <- clause[-1]
         }
 
         #check both before and after possibly removing the (pair)list symbol
@@ -183,7 +183,7 @@ function(val, ...)
             {
                 #the implicit progn
                 body <- c(list(as.symbol("{")),
-                          as.list(clause[2:length(clause)]))
+                          as.list(clause[-1]))
                 return(eval(as.call(body), envir=e))
             }
         }
@@ -215,7 +215,7 @@ function(...)
         if(clause[[1]] == as.symbol("list") ||
            clause[[1]] == as.symbol("pairlist"))
         {
-            clause <- clause[2:length(clause)]
+            clause <- clause[-1]
         }
 
         #check both before and after possibly removing the (pair)list symbol
@@ -225,7 +225,7 @@ function(...)
         e <- parent.frame()
         if(eval(clause[[1]], envir=e))
         {
-            body <- c(list(as.symbol("{")), as.list(clause[2:length(clause)]))
+            body <- c(list(as.symbol("{")), as.list(clause[-1]))
             return(eval(as.call(body), envir=e))
         }
     }
@@ -247,6 +247,9 @@ function(...)
 do <-
 function(bindings, test, ...)
 {
+    if(missing(test))
+        stop("No test expression provided")
+
     bindings <- as.list(substitute(bindings))
     test <- substitute(test)
     args <- eval(substitute(alist(...)))
@@ -255,7 +258,7 @@ function(bindings, test, ...)
     if(bindings[[1]] == as.symbol("list") ||
        bindings[[1]] == as.symbol("pairlist"))
     {
-        bindings <- bindings[2:length(bindings)]
+        bindings <- bindings[-1]
     }
 
     for(b in bindings)
@@ -277,7 +280,7 @@ function(bindings, test, ...)
     if(test[[1]] == as.symbol("list") ||
        test[[1]] == as.symbol("pairlist"))
     {
-        test <- test[2:length(test)]
+        test <- test[-1]
     }
 
     #check both before and after possibly removing the (pair)list symbol
@@ -301,7 +304,7 @@ function(bindings, test, ...)
         if(binding[[1]] == as.symbol("list") ||
            binding[[1]] == as.symbol("pairlist"))
         {
-            binding <- binding[2:length(binding)]
+            binding <- binding[-1]
         }
 
         nm <- as.character(binding[[1]])
@@ -337,7 +340,7 @@ function(bindings, test, ...)
                 return(ret)
             } else # >= 2
             {
-                body <- c(list(as.symbol("{")), as.list(test[2:length(test)]))
+                body <- c(list(as.symbol("{")), as.list(test[-1]))
                 return(eval(as.call(body), envir=e))
             }
         } else

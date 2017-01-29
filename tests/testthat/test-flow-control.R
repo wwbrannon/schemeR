@@ -94,13 +94,6 @@ test_that("do works correctly", {
     expect_error(do(list(list(x, 1), list(y, 2))))
     expect_error(do(list(list(x), list(y))))
 
-    #A twofer: a) we can give no bindings, b) vars in containing scopes
-    #are found
-    x <- 9
-    expect_equal(do(list(), list(x > 5, x)), 9)
-    f <- function() { do(list(), list(x > 5, x)) }
-    expect_equal(f(), 9)
-
     #Works with and without step expressions
     expect_equal(do(list(list(x, 6), list(y, 1)), list(x > 10, 20),
                     x <- x + 1), 20)
@@ -124,4 +117,13 @@ test_that("do works correctly", {
                 .(s, 0, .(`+`, s, .(car, x)))),
             .(.(is.nil, x), s))
     }), 25)
+
+    #A twofer:
+    #    a) we can give no bindings,
+    #    b) vars in containing scopes are found
+    x <- 9
+    f <- function() { do(list(), list(x > 5, x)) }
+
+    expect_equal(do(list(), list(x > 5, x)), 9)
+    expect_equal(f(), 9)
 })
