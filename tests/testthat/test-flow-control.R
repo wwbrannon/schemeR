@@ -87,8 +87,38 @@ test_that("cond works correctly", {
 })
 
 test_that("do works correctly", {
-    #FIXME
+    #Things that shouldn't work don't
+    expect_error(do())
+    expect_error(do(list(list(x, 1))))
+    expect_error(do(list(list(x))))
+    expect_error(do(list(list(x, 1), list(y, 2))))
+    expect_error(do(list(list(x), list(y))))
 
+    #A twofer: a) we can give no bindings, b) vars in containing scopes
+    #are found
+    x <- 9
+    expect_equal(do(list(), list(x > 5, x)), 9)
+    f <- function() { do(list(), list(x > 5, x)) }
+    expect_equal(f(), 9)
+
+    #Works with and without step expressions
+    expect_equal(do(list(list(x, 6), list(y, 1)), list(x > 10, 20),
+                    x <- x + 1), 20)
+    expect_equal(do(list(list(x, 6, x+1), list(y, 1, y+1)),
+                    list(x > 10, 20)),
+                 20)
+
+    #The test expression's value is returned if another isn't supplied
+    expect_true(do(list(list(x, 6, x+1), list(y, 1, y+1)),
+                    list(x > 10)))
+
+    #The command expressions are evaluated (in order); also tested above
+    expect_equal(capture.output(do(list(list(x, 6), list(y, 1)), list(x > 10, 20),
+                    x <- x + 1, cat("foo"), cat("bar"))),
+                 "foobarfoobarfoobarfoobarfoobar[1] 20")
+
+    #Another twofer: a) works in prefix notation, b) on each iteration, all
+    #step expressions are recomputed before rebinding any of the variables
     expect_equal(schemeR({
         .(do, .(.(x, .(c, 1, 3, 5, 7, 9), .(cdr, x)),
                 .(s, 0, .(`+`, s, .(car, x)))),
