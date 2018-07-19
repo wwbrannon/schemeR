@@ -254,6 +254,9 @@ function(bindings, test, ...)
     test <- substitute(test)
     args <- eval(substitute(alist(...)))
 
+    if(length(bindings) == 0)
+        TRUE #FIXME
+
     #Same hack as in the let constructs - see the comment block in let()
     if(bindings[[1]] == as.symbol("list") ||
        bindings[[1]] == as.symbol("pairlist"))
